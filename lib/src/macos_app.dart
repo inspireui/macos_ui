@@ -361,6 +361,7 @@ class _MacosAppState extends State<MacosApp> {
     if (_usesRouter) {
       return c.CupertinoApp.router(
         key: GlobalObjectKey(this),
+        scrollBehavior: widget.scrollBehavior,
         routeInformationProvider: widget.routeInformationProvider,
         routeInformationParser: widget.routeInformationParser!,
         routerDelegate: widget.routerDelegate!,
@@ -385,6 +386,7 @@ class _MacosAppState extends State<MacosApp> {
     }
     return c.CupertinoApp(
       key: GlobalObjectKey(this),
+      scrollBehavior: widget.scrollBehavior,
       navigatorKey: widget.navigatorKey,
       navigatorObservers: widget.navigatorObservers!,
       home: widget.home,
