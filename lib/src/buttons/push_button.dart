@@ -36,6 +36,8 @@ class PushButton extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.alignment = Alignment.center,
     this.semanticLabel,
+    this.mouseCursor = SystemMouseCursors.basic,
+    this.isSecondary,
   })  : assert(pressedOpacity == null ||
             (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
         super(key: key);
@@ -99,8 +101,17 @@ class PushButton extends StatefulWidget {
   /// Always defaults to [Alignment.center].
   final AlignmentGeometry alignment;
 
+  /// The mouse cursor to use when hovering over this widget.
+  final MouseCursor? mouseCursor;
+
   /// The semantic label used by screen readers.
   final String? semanticLabel;
+
+  /// Whether the button is used as a secondary action button (e.g. Cancel buttons in dialogs)
+  ///
+  /// Sets its background color to [PushButtonThemeData]'s [secondaryColor] attributes (defaults
+  /// are gray colors). Can still be overriden if the [color] attribute is non-null.
+  final bool? isSecondary;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
@@ -121,13 +132,14 @@ class PushButton extends StatefulWidget {
       value: enabled,
       ifFalse: 'disabled',
     ));
+    properties.add(DiagnosticsProperty('isSecondary', isSecondary));
   }
 
   @override
-  _PushButtonState createState() => _PushButtonState();
+  PushButtonState createState() => PushButtonState();
 }
 
-class _PushButtonState extends State<PushButton>
+class PushButtonState extends State<PushButton>
     with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = Duration(milliseconds: 10);
@@ -167,37 +179,38 @@ class _PushButtonState extends State<PushButton>
     super.dispose();
   }
 
-  bool _buttonHeldDown = false;
+  @visibleForTesting
+  bool buttonHeldDown = false;
 
   void _handleTapDown(TapDownDetails event) {
-    if (!_buttonHeldDown) {
-      _buttonHeldDown = true;
+    if (!buttonHeldDown) {
+      buttonHeldDown = true;
       _animate();
     }
   }
 
   void _handleTapUp(TapUpDetails event) {
-    if (_buttonHeldDown) {
-      _buttonHeldDown = false;
+    if (buttonHeldDown) {
+      buttonHeldDown = false;
       _animate();
     }
   }
 
   void _handleTapCancel() {
-    if (_buttonHeldDown) {
-      _buttonHeldDown = false;
+    if (buttonHeldDown) {
+      buttonHeldDown = false;
       _animate();
     }
   }
 
   void _animate() {
     if (_animationController.isAnimating) return;
-    final bool wasHeldDown = _buttonHeldDown;
-    final TickerFuture ticker = _buttonHeldDown
+    final bool wasHeldDown = buttonHeldDown;
+    final TickerFuture ticker = buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
         : _animationController.animateTo(0.0, duration: kFadeInDuration);
     ticker.then<void>((void value) {
-      if (mounted && wasHeldDown != _buttonHeldDown) _animate();
+      if (mounted && wasHeldDown != buttonHeldDown) _animate();
     });
   }
 
@@ -205,14 +218,18 @@ class _PushButtonState extends State<PushButton>
   Widget build(BuildContext context) {
     assert(debugCheckHasMacosTheme(context));
     final bool enabled = widget.enabled;
+    final bool isSecondary = widget.isSecondary != null && widget.isSecondary!;
     final MacosThemeData theme = MacosTheme.of(context);
     final Color backgroundColor = MacosDynamicColor.resolve(
-      widget.color ?? theme.pushButtonTheme.color,
+      widget.color ??
+          (isSecondary
+              ? theme.pushButtonTheme.secondaryColor!
+              : theme.pushButtonTheme.color!),
       context,
     );
 
     final Color disabledColor = MacosDynamicColor.resolve(
-      widget.disabledColor ?? theme.pushButtonTheme.disabledColor,
+      widget.disabledColor ?? theme.pushButtonTheme.disabledColor!,
       context,
     );
 
@@ -231,14 +248,14 @@ class _PushButtonState extends State<PushButton>
     final Color foregroundColor = widget.enabled
         ? textLuminance(backgroundColor)
         : theme.brightness.isDark
-            ? Color.fromRGBO(255, 255, 255, 0.25)
-            : Color.fromRGBO(0, 0, 0, 0.25);
+            ? const Color.fromRGBO(255, 255, 255, 0.25)
+            : const Color.fromRGBO(0, 0, 0, 0.25);
 
     final TextStyle textStyle =
         theme.typography.headline.copyWith(color: foregroundColor);
 
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: widget.mouseCursor!,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapDown: enabled ? _handleTapDown : null,
@@ -249,7 +266,7 @@ class _PushButtonState extends State<PushButton>
           button: true,
           label: widget.semanticLabel,
           child: ConstrainedBox(
-            constraints: BoxConstraints(
+            constraints: const BoxConstraints(
               minWidth: 49,
               minHeight: 20,
             ),
@@ -336,23 +353,29 @@ class PushButtonTheme extends InheritedTheme {
 class PushButtonThemeData with Diagnosticable {
   /// Creates a [PushButtonThemeData].
   const PushButtonThemeData({
-    required this.color,
-    required this.disabledColor,
+    this.color,
+    this.disabledColor,
+    this.secondaryColor,
   });
 
   /// The default background color for [PushButton]
-  final Color color;
+  final Color? color;
 
   /// The default disabled color for [PushButton]
-  final Color disabledColor;
+  final Color? disabledColor;
 
-  PushButtonThemeData copyWith(PushButtonThemeData? themeData) {
-    if (themeData == null) {
-      return this;
-    }
+  /// The default secondary color (e.g. Cancel/Go back buttons) for [PushButton]
+  final Color? secondaryColor;
+
+  PushButtonThemeData copyWith({
+    Color? color,
+    Color? disabledColor,
+    Color? secondaryColor,
+  }) {
     return PushButtonThemeData(
-      color: themeData.color,
-      disabledColor: themeData.disabledColor,
+      color: color ?? this.color,
+      disabledColor: disabledColor ?? this.disabledColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
     );
   }
 
@@ -365,15 +388,29 @@ class PushButtonThemeData with Diagnosticable {
     double t,
   ) {
     return PushButtonThemeData(
-      color: Color.lerp(a.color, b.color, t)!,
-      disabledColor: Color.lerp(a.color, b.color, t)!,
+      color: Color.lerp(a.color, b.color, t),
+      disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
+      secondaryColor: Color.lerp(a.secondaryColor, b.secondaryColor, t),
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PushButtonThemeData &&
+          runtimeType == other.runtimeType &&
+          color?.value == other.color?.value &&
+          disabledColor?.value == other.disabledColor?.value &&
+          secondaryColor?.value == other.secondaryColor?.value;
+
+  @override
+  int get hashCode => color.hashCode ^ disabledColor.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color));
     properties.add(ColorProperty('disabledColor', disabledColor));
+    properties.add(ColorProperty('secondaryColor', secondaryColor));
   }
 }

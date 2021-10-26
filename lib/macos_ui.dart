@@ -10,6 +10,8 @@
 
 library macos_ui;
 
+export 'package:native_context_menu/native_context_menu.dart';
+
 export 'src/buttons/back_button.dart';
 export 'src/buttons/checkbox.dart';
 export 'src/buttons/help_button.dart';
@@ -19,6 +21,7 @@ export 'src/buttons/radio_button.dart';
 export 'src/buttons/switch.dart';
 export 'src/dialogs/macos_alert_dialog.dart';
 export 'src/fields/text_field.dart';
+export 'src/icon/macos_icon.dart';
 export 'src/indicators/capacity_indicators.dart';
 export 'src/indicators/progress_indicators.dart';
 export 'src/indicators/rating_indicator.dart';
@@ -27,6 +30,7 @@ export 'src/indicators/scrollbar.dart';
 export 'src/labels/label.dart';
 export 'src/labels/tooltip.dart';
 export 'src/layout/content_area.dart';
+export 'src/layout/macos_list_tile.dart';
 export 'src/layout/resizable_pane.dart';
 export 'src/layout/scaffold.dart';
 export 'src/layout/sidebar.dart';
@@ -34,6 +38,7 @@ export 'src/layout/sidebar_item.dart';
 export 'src/layout/title_bar.dart';
 export 'src/layout/window.dart';
 export 'src/macos_app.dart';
+export 'src/sheets/macos_sheet.dart';
 export 'src/theme/macos_colors.dart';
 export 'src/theme/macos_dynamic_color.dart';
 export 'src/theme/macos_theme.dart';

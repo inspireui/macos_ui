@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:provider/provider.dart';
+
+import '../theme.dart';
 
 class ButtonsPage extends StatefulWidget {
+  const ButtonsPage({Key? key}) : super(key: key);
+
   @override
   _ButtonsPageState createState() => _ButtonsPageState();
 }
@@ -12,11 +17,11 @@ class _ButtonsPageState extends State<ButtonsPage> {
   Widget build(BuildContext context) {
     return MacosScaffold(
       titleBar: TitleBar(
-        title: Text('macOS UI Widget Gallery'),
+        title: const Text('macOS UI Widget Gallery'),
         actions: [
           MacosIconButton(
             backgroundColor: MacosColors.transparent,
-            icon: Icon(
+            icon: const MacosIcon(
               CupertinoIcons.sidebar_left,
               color: MacosColors.systemGrayColor,
             ),
@@ -24,7 +29,7 @@ class _ButtonsPageState extends State<ButtonsPage> {
               MacosWindowScope.of(context).toggleSidebar();
             },
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
         ],
       ),
       children: [
@@ -34,16 +39,18 @@ class _ButtonsPageState extends State<ButtonsPage> {
           windowBreakpoint: 700,
           resizableSide: ResizableSide.right,
           builder: (_, __) {
-            return Center(child: Text('Resizable Pane'));
+            return const Center(
+              child: Text('Resizable Pane'),
+            );
           },
         ),
         ContentArea(builder: (context, scrollController) {
           return SingleChildScrollView(
             controller: scrollController,
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                Text('MacosBackButton'),
+                const Text('MacosBackButton'),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -55,18 +62,17 @@ class _ButtonsPageState extends State<ButtonsPage> {
                     const SizedBox(width: 16.0),
                     MacosBackButton(
                       onPressed: () => print('click'),
-                      //fillColor: Colors.transparent,
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-                Text('MacosIconButton'),
+                const Text('MacosIconButton'),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     MacosIconButton(
-                      icon: Icon(
+                      icon: const MacosIcon(
                         CupertinoIcons.star_fill,
                         color: Colors.white,
                       ),
@@ -75,18 +81,18 @@ class _ButtonsPageState extends State<ButtonsPage> {
                       onPressed: () {},
                     ),
                     const SizedBox(width: 8),
-                    MacosIconButton(
-                      icon: Icon(
-                        CupertinoIcons.star_fill,
+                    const MacosIconButton(
+                      icon: MacosIcon(
+                        CupertinoIcons.plus_app,
                         color: Colors.white,
                       ),
                       shape: BoxShape.circle,
-                      onPressed: () {},
+                      //onPressed: () {},
                     ),
                     const SizedBox(width: 8),
                     MacosIconButton(
-                      icon: Icon(
-                        CupertinoIcons.star_fill,
+                      icon: const MacosIcon(
+                        CupertinoIcons.minus_square,
                         color: Colors.white,
                       ),
                       backgroundColor: Colors.transparent,
@@ -97,7 +103,7 @@ class _ButtonsPageState extends State<ButtonsPage> {
                 const SizedBox(height: 20),
                 PushButton(
                   buttonSize: ButtonSize.large,
-                  child: Text('large PushButton'),
+                  child: const Text('large PushButton'),
                   onPressed: () {
                     MacosWindowScope.of(context).toggleSidebar();
                   },
@@ -105,14 +111,14 @@ class _ButtonsPageState extends State<ButtonsPage> {
                 const SizedBox(height: 20),
                 PushButton(
                   buttonSize: ButtonSize.small,
-                  child: Text('small PushButton'),
+                  child: const Text('small PushButton'),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) {
                           return MacosScaffold(
-                            titleBar: TitleBar(
+                            titleBar: const TitleBar(
                               centerTitle: false,
                               title: Text('New page'),
                             ),
@@ -122,7 +128,7 @@ class _ButtonsPageState extends State<ButtonsPage> {
                                   return Center(
                                     child: PushButton(
                                       buttonSize: ButtonSize.large,
-                                      child: Text('Go Back'),
+                                      child: const Text('Go Back'),
                                       onPressed: () {
                                         Navigator.maybePop(context);
                                       },
@@ -136,7 +142,9 @@ class _ButtonsPageState extends State<ButtonsPage> {
                                 windowBreakpoint: 700,
                                 resizableSide: ResizableSide.left,
                                 builder: (_, __) {
-                                  return Center(child: Text('Resizable Pane'));
+                                  return const Center(
+                                    child: Text('Resizable Pane'),
+                                  );
                                 },
                               ),
                             ],
@@ -145,6 +153,60 @@ class _ButtonsPageState extends State<ButtonsPage> {
                       ),
                     );
                   },
+                ),
+                const SizedBox(height: 20),
+                PushButton(
+                  buttonSize: ButtonSize.large,
+                  isSecondary: true,
+                  child: const Text('secondary PushButton'),
+                  onPressed: () {
+                    MacosWindowScope.of(context).toggleSidebar();
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('System Theme'),
+                    const SizedBox(width: 8),
+                    MacosRadioButton<ThemeMode>(
+                      groupValue: context.watch<AppTheme>().mode,
+                      value: ThemeMode.system,
+                      onChanged: (value) {
+                        context.read<AppTheme>().mode = value!;
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Light Theme'),
+                    const SizedBox(width: 24),
+                    MacosRadioButton<ThemeMode>(
+                      groupValue: context.watch<AppTheme>().mode,
+                      value: ThemeMode.light,
+                      onChanged: (value) {
+                        context.read<AppTheme>().mode = value!;
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Dark Theme'),
+                    const SizedBox(width: 26),
+                    MacosRadioButton<ThemeMode>(
+                      groupValue: context.watch<AppTheme>().mode,
+                      value: ThemeMode.dark,
+                      onChanged: (value) {
+                        context.read<AppTheme>().mode = value!;
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -156,7 +218,9 @@ class _ButtonsPageState extends State<ButtonsPage> {
           windowBreakpoint: 800,
           resizableSide: ResizableSide.left,
           builder: (_, __) {
-            return Center(child: Text('Resizable Pane'));
+            return const Center(
+              child: Text('Resizable Pane'),
+            );
           },
         ),
       ],

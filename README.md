@@ -2,6 +2,15 @@
 
 Flutter widgets and themes implementing the current macOS design language.
 
+[![Flutter Analysis](https://github.com/GroovinChip/macos_ui/actions/workflows/flutter_analysis.yml/badge.svg)](https://github.com/GroovinChip/macos_ui/actions/workflows/flutter_analysis.yml)
+[![Pana Analysis](https://github.com/GroovinChip/macos_ui/actions/workflows/pana_analysis.yml/badge.svg)](https://github.com/GroovinChip/macos_ui/actions/workflows/pana_analysis.yml)
+[![codecov](https://github.com/GroovinChip/macos_ui/actions/workflows/codecov.yaml/badge.svg)](https://github.com/GroovinChip/macos_ui/actions/workflows/codecov.yaml)
+[![codecov](https://codecov.io/gh/GroovinChip/macos_ui/branch/dev/graph/badge.svg?token=1SZGEVVMCH)](https://codecov.io/gh/GroovinChip/macos_ui)
+
+NOTE: This package depends on the excellent [native_context_menu](https://pub.dev/packages/native_context_menu) plugin.
+Since it is a desktop plugin, and therefore does not target Android and iOS, the pub score of this package
+is lower than 130
+
 ## Content
 
 - [macos_ui](#macos_ui)
@@ -11,14 +20,19 @@ Flutter widgets and themes implementing the current macOS design language.
 - [Layout](#layout)
   - [MacosWindow](#macoswindow)
   - [MacosScaffold](#macosscaffold)
+  - [MacosListTile](#MacosListTile)
+- [Icons](#icons)
+  - [MacosIcon](#MacosIcon)
 - [Buttons](#buttons)
   - [MacosCheckbox](#macoscheckbox)
   - [HelpButton](#helpbutton)
   - [RadioButton](#radiobutton)
   - [PushButton](#pushbutton)
   - [MacosSwitch](#macosswitch)
-- [Dialogs](#dialogs)
+- [Dialogs and Sheets](#dialogs)
   - [MacosAlertDialog](#MacosAlertDialog)
+  - [MacosSheet](#MacosSheet)
+- [Context Menus](#ContextMenus)
 - [Fields](#fields)
   - [MacosTextField](#macostextfield)
 - [Labels](#labels)
@@ -105,6 +119,45 @@ class MainFlutterWindow: NSWindow {
   }
 }
 
+```
+
+## MacosListTile
+
+A widget that aims to approximate the [ListTile] widget found in
+Flutter's material library.
+
+![MacosListTile](https://imgur.com/pQB99M2.png)
+
+Usage:
+```dart
+MacosListTile(
+  leading: const Icon(CupertinoIcons.lightbulb),
+  title: Text(
+    'A robust library of Flutter components for macOS',
+    style: MacosTheme.of(context).typography.headline,
+  ),
+  subtitle: Text(
+    'Create native looking macOS applications using Flutter',
+    style: MacosTheme.of(context).typography.subheadline.copyWith(
+      color: MacosColors.systemGrayColor,
+    ),
+  ),
+),
+```
+
+# Icons
+
+## MacosIcon
+
+A `MacosIcon` is identical to a regular `Icon` in every way with one exception - it respects
+a `MacosTheme`. Use it the same way you would a regular icon:
+
+```dart
+MacosIcon(
+  CupertinoIcons.add,
+  // color: CupertinoColors.activeBlue.color,
+  // size: 20,
+),
 ```
 
 # Buttons
@@ -213,13 +266,13 @@ MacosSwitch(
 ),
 ```
 
-# Dialogs
+# Dialogs and Sheets
 
 ## MacosAlertDialog
 
 Usage:
 ```dart
-showDialog(
+showMacosAlertDialog(
   context: context,
   builder: (_) => MacosAlertDialog(
     appIcon: FlutterLogo(
@@ -246,6 +299,27 @@ showDialog(
 ![](https://imgur.com/G3dcjew.png)
 ![](https://imgur.com/YHtgv59.png)
 ![](https://imgur.com/xuBR5qK.png)
+
+## MacosSheet
+
+Usage:
+```dart
+showMacosSheet(
+  context: context,
+  builder: (_) => const MacosuiSheet(),
+);
+```
+
+![](https://imgur.com/NV0o5Ws.png)
+
+# Context Menus
+
+macos_ui uses the [native_context_menu] plugin under the hood for Context Menus. 
+Please consult the readme for that plugin for usage.
+
+![](https://lesnitsky-images.s3.eu-north-1.amazonaws.com/native_context_menu.gif)
+
+(gif courtesy of the `native_context_menu` plugin)
 
 # Fields
 

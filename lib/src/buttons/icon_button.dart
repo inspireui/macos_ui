@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:macos_ui/src/library.dart';
 
@@ -23,6 +22,7 @@ class MacosIconButton extends StatefulWidget {
       maxWidth: 30,
       maxHeight: 30,
     ),
+    this.mouseCursor = SystemMouseCursors.basic,
   })  : assert(pressedOpacity == null ||
             (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
         super(key: key);
@@ -89,6 +89,9 @@ class MacosIconButton extends StatefulWidget {
   /// The semantic label used by screen readers.
   final String? semanticLabel;
 
+  /// The mouse cursor to use when hovering over this widget.
+  final MouseCursor? mouseCursor;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -104,10 +107,10 @@ class MacosIconButton extends StatefulWidget {
   }
 
   @override
-  _MacosIconButtonState createState() => _MacosIconButtonState();
+  MacosIconButtonState createState() => MacosIconButtonState();
 }
 
-class _MacosIconButtonState extends State<MacosIconButton>
+class MacosIconButtonState extends State<MacosIconButton>
     with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = Duration(milliseconds: 10);
@@ -147,47 +150,48 @@ class _MacosIconButtonState extends State<MacosIconButton>
     super.dispose();
   }
 
-  bool _buttonHeldDown = false;
+  @visibleForTesting
+  bool buttonHeldDown = false;
 
   void _handleTapDown(TapDownDetails event) {
-    if (!_buttonHeldDown) {
-      _buttonHeldDown = true;
+    if (!buttonHeldDown) {
+      buttonHeldDown = true;
       _animate();
     }
   }
 
   void _handleTapUp(TapUpDetails event) {
-    if (_buttonHeldDown) {
-      _buttonHeldDown = false;
+    if (buttonHeldDown) {
+      buttonHeldDown = false;
       _animate();
     }
   }
 
   void _handleTapCancel() {
-    if (_buttonHeldDown) {
-      _buttonHeldDown = false;
+    if (buttonHeldDown) {
+      buttonHeldDown = false;
       _animate();
     }
   }
 
   void _animate() {
     if (_animationController.isAnimating) return;
-    final bool wasHeldDown = _buttonHeldDown;
-    final TickerFuture ticker = _buttonHeldDown
+    final bool wasHeldDown = buttonHeldDown;
+    final TickerFuture ticker = buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
         : _animationController.animateTo(0.0, duration: kFadeInDuration);
     ticker.then<void>((void value) {
-      if (mounted && wasHeldDown != _buttonHeldDown) _animate();
+      if (mounted && wasHeldDown != buttonHeldDown) _animate();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
-    final MacosThemeData theme = MacosTheme.of(context);
+    final theme = MacosIconButtonTheme.of(context);
 
     final Color backgroundColor =
-        widget.backgroundColor ?? CupertinoColors.systemBlue;
+        widget.backgroundColor ?? theme.backgroundColor!;
 
     final Color? disabledColor;
 
@@ -197,12 +201,11 @@ class _MacosIconButtonState extends State<MacosIconButton>
         context,
       );
     } else {
-      disabledColor =
-          theme.brightness.isDark ? Color(0xff353535) : Color(0xffE5E5E5);
+      disabledColor = theme.disabledColor;
     }
 
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: widget.mouseCursor!,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapDown: enabled ? _handleTapDown : null,
@@ -224,7 +227,7 @@ class _MacosIconButtonState extends State<MacosIconButton>
                   color: !enabled ? disabledColor : backgroundColor,
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Align(
                     alignment: widget.alignment,
                     widthFactor: 1.0,
@@ -240,6 +243,151 @@ class _MacosIconButtonState extends State<MacosIconButton>
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Overrides the default style of its [MacosIconButton] descendants.
+///
+/// See also:
+///
+///  * [MacosIconButtonThemeData], which is used to configure this theme.
+class MacosIconButtonTheme extends InheritedTheme {
+  /// Builds a [MacosIconButtonTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const MacosIconButtonTheme({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// The configuration of this theme.
+  final MacosIconButtonThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [MacosIconButtonTheme] widget, then
+  /// [MacosThemeData.macosIconButtonTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// final theme = MacosIconButtonTheme.of(context);
+  /// ```
+  static MacosIconButtonThemeData of(BuildContext context) {
+    final MacosIconButtonTheme? buttonTheme =
+        context.dependOnInheritedWidgetOfExactType<MacosIconButtonTheme>();
+    return buttonTheme?.data ?? MacosTheme.of(context).macosIconButtonTheme;
+  }
+
+  Widget wrap(BuildContext context, Widget child) {
+    return MacosIconButtonTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(MacosIconButtonTheme oldWidget) =>
+      data != oldWidget.data;
+}
+
+/// A style that overrides the default appearance of
+/// [MacosIconButton]s when it's used with [MacosIconButtonTheme] or with the
+/// overall [MacosTheme]'s [MacosThemeData.macosIconButtonTheme].
+///
+/// See also:
+///
+///  * [MacosIconButtonTheme], the theme which is configured with this class.
+///  * [MacosThemeData.macosIconButtonTheme], which can be used to override
+///  the default style for [MacosIconButton]s below the overall [MacosTheme].
+class MacosIconButtonThemeData with Diagnosticable {
+  /// Builds a [MacosIconButtonThemeData].
+  const MacosIconButtonThemeData({
+    this.backgroundColor,
+    this.disabledColor,
+    this.shape,
+    this.borderRadius,
+    this.boxConstraints,
+  });
+
+  /// The default background color for [MacosIconButton].
+  final Color? backgroundColor;
+
+  /// The default disabled color for [MacosIconButton].
+  final Color? disabledColor;
+
+  /// The default shape for [MacosIconButton].
+  final BoxShape? shape;
+
+  /// The default border radius for [MacosIconButton].
+  final BorderRadius? borderRadius;
+
+  /// The default box constraints for [MacosIconButton].
+  final BoxConstraints? boxConstraints;
+
+  /// Copies this [MacosIconButtonThemeData] into another.
+  MacosIconButtonThemeData copyWith({
+    Color? backgroundColor,
+    Color? disabledColor,
+    BoxShape? shape,
+    BorderRadius? borderRadius,
+    BoxConstraints? boxConstraints,
+  }) {
+    return MacosIconButtonThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      disabledColor: disabledColor ?? this.disabledColor,
+      shape: shape ?? this.shape,
+      borderRadius: borderRadius ?? this.borderRadius,
+      boxConstraints: boxConstraints ?? this.boxConstraints,
+    );
+  }
+
+  /// Linearly interpolate between two [MacosIconButtonThemeData].
+  ///
+  /// All the properties must be non-null.
+  static MacosIconButtonThemeData lerp(
+    MacosIconButtonThemeData a,
+    MacosIconButtonThemeData b,
+    double t,
+  ) {
+    return MacosIconButtonThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
+      shape: b.shape,
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      boxConstraints:
+          BoxConstraints.lerp(a.boxConstraints, b.boxConstraints, t),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MacosIconButtonThemeData &&
+          runtimeType == other.runtimeType &&
+          backgroundColor?.value == other.backgroundColor?.value &&
+          disabledColor?.value == other.disabledColor?.value &&
+          shape == other.shape &&
+          borderRadius == other.borderRadius &&
+          boxConstraints == other.boxConstraints;
+
+  @override
+  int get hashCode =>
+      backgroundColor.hashCode ^
+      disabledColor.hashCode ^
+      shape.hashCode ^
+      borderRadius.hashCode ^
+      boxConstraints.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
+    properties.add(ColorProperty('disabledColor', disabledColor));
+    properties.add(EnumProperty<BoxShape?>('shape', shape));
+    properties
+        .add(DiagnosticsProperty<BorderRadius?>('borderRadius', borderRadius));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints?>('boxConstraints', boxConstraints),
     );
   }
 }

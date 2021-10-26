@@ -1,3 +1,48 @@
+## [0.10.0]
+* New widget - `MacosIcon`! `MacosIcon` is identical to regular icons, with the exception that it respects a `MacosTheme`. Also includes corresponding theme classes
+* `MacosThemeData` now sets a global, configurable `iconTheme` for `MacosIcon`s 
+
+## [0.9.3]
+* Update to `PushButton`:
+  * Added `isSecondary` property
+
+## [0.9.2]
+* Nearly all `MouseRegion`s have been updated to use `SystemMouseCursors.basic` in order to more closely adhere to Apple norms
+* `mouseCursor` properties have been added to most buttons
+
+## [0.9.1]
+* Added top-level theming for `MacosIconButton`
+  * Introduces the `MacosIconButtonTheme` InheritedTheme and the `MacosIconButtonThemeData` theme class
+* Updates `MacosThemeData` and `MacosIconButton` to use the new `MacosIconButtonThemeData`
+* Removes an unnecessary setting of VisualDensity from `MacosThemeData.dark()`
+
+## [0.9.0]
+* Added [native_context_menu](https://pub.dev/packages/native_context_menu) as a dependency for native context menus!
+
+## [0.8.2]
+* Updates to `MacosListTile`:
+  * Added `leadingWhitespace` property
+  * Added `onClick` callback
+  * Added `onLongPress` callback
+  * Added `mouseCursor` property
+
+## [0.8.1]
+* Fix the outer border of `MacosSheet` not having a border radius
+
+## [0.8.0]
+* New Widget: `MacoSheet`
+* New Widget: `MacosListTile`
+
+## [0.7.3]
+* Fixed bug where cursor would not change caret location on mouse click
+
+## [0.7.2]
+* Upgraded various `copyWith` functions
+* Added `==` and `hashCode` to various classes
+
+## [0.7.1]
+* Add generics support to `MacosRadioButton` - Thank you [Sacha Arbonel](https://github.com/sachaarbonel)!
+
 ## [0.7.0+2]
 * Add note in docs that a `Builder` is required for manual sidebar toggling to work.
 

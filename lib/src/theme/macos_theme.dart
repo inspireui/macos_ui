@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:macos_ui/src/icon/macos_icon.dart';
 import 'package:macos_ui/src/library.dart';
 
 /// Applies a macOS-style theme to descendant macOS widgets.
@@ -195,6 +196,8 @@ class MacosThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     VisualDensity? visualDensity,
     ScrollbarThemeData? scrollbarTheme,
+    MacosIconButtonThemeData? macosIconButtonThemeData,
+    MacosIconThemeData? iconTheme,
   }) {
     final Brightness _brightness = brightness ?? Brightness.light;
     final bool isDark = _brightness == Brightness.dark;
@@ -211,26 +214,49 @@ class MacosThemeData with Diagnosticable {
     );
     pushButtonTheme ??= PushButtonThemeData(
       color: primaryColor,
+      secondaryColor: isDark
+          ? const Color.fromRGBO(56, 56, 56, 1.0)
+          : const Color.fromRGBO(218, 218, 223, 1.0),
       disabledColor: isDark
-          ? Color.fromRGBO(255, 255, 255, 0.1)
-          : Color.fromRGBO(244, 245, 245, 1.0),
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(244, 245, 245, 1.0),
     );
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     helpButtonTheme ??= HelpButtonThemeData(
       color: isDark
-          ? Color.fromRGBO(255, 255, 255, 0.1)
-          : Color.fromRGBO(244, 245, 245, 1.0),
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(244, 245, 245, 1.0),
       disabledColor: isDark
-          ? Color.fromRGBO(255, 255, 255, 0.1)
-          : Color.fromRGBO(244, 245, 245, 1.0),
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(244, 245, 245, 1.0),
     );
     tooltipTheme ??= TooltipThemeData.standard(
       brightness: _brightness,
       textStyle: typography.callout,
     );
     scrollbarTheme ??= const ScrollbarThemeData();
+    macosIconButtonThemeData ??= MacosIconButtonThemeData(
+      backgroundColor: MacosColors.transparent,
+      disabledColor: isDark
+          ? const Color(0xff353535)
+          : const Color(0xffE5E5E5), // TODO: correct disabled color
+      shape: BoxShape.circle,
+      boxConstraints: const BoxConstraints(
+        minHeight: 20,
+        minWidth: 20,
+        maxWidth: 30,
+        maxHeight: 30,
+      ),
+    );
 
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
+
+    iconTheme ??= MacosIconThemeData(
+      color: isDark
+          ? CupertinoColors.activeBlue.darkColor
+          : CupertinoColors.activeBlue.color,
+      size: 20,
+    );
 
     return MacosThemeData.raw(
       brightness: _brightness,
@@ -243,6 +269,8 @@ class MacosThemeData with Diagnosticable {
       tooltipTheme: tooltipTheme,
       visualDensity: visualDensity,
       scrollbarTheme: scrollbarTheme,
+      macosIconButtonTheme: macosIconButtonThemeData,
+      iconTheme: iconTheme,
     );
   }
 
@@ -263,6 +291,8 @@ class MacosThemeData with Diagnosticable {
     required this.tooltipTheme,
     required this.visualDensity,
     required this.scrollbarTheme,
+    required this.macosIconButtonTheme,
+    required this.iconTheme,
   });
 
   /// A default light theme.
@@ -270,10 +300,7 @@ class MacosThemeData with Diagnosticable {
       MacosThemeData(brightness: Brightness.light);
 
   /// A default dark theme.
-  factory MacosThemeData.dark() => MacosThemeData(
-        brightness: Brightness.dark,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      );
+  factory MacosThemeData.dark() => MacosThemeData(brightness: Brightness.dark);
 
   /// The default color theme. Same as [ThemeData.light].
   ///
@@ -321,6 +348,12 @@ class MacosThemeData with Diagnosticable {
   /// The default style for [MacosScrollbar]s below the overall [MacosTheme]
   final ScrollbarThemeData scrollbarTheme;
 
+  /// The default style for [MacosIconButton]s below the overall [MacosTheme]
+  final MacosIconButtonThemeData macosIconButtonTheme;
+
+  /// The default style for [MacosIcon]s below the overall [MacosTheme]
+  final MacosIconThemeData iconTheme;
+
   /// Linearly interpolate between two themes.
   static MacosThemeData lerp(MacosThemeData a, MacosThemeData b, double t) {
     return MacosThemeData.raw(
@@ -337,6 +370,12 @@ class MacosThemeData with Diagnosticable {
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       scrollbarTheme:
           ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
+      macosIconButtonTheme: MacosIconButtonThemeData.lerp(
+        a.macosIconButtonTheme,
+        b.macosIconButtonTheme,
+        t,
+      ),
+      iconTheme: MacosIconThemeData.lerp(a.iconTheme, b.iconTheme, t),
     );
   }
 
@@ -352,6 +391,8 @@ class MacosThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     VisualDensity? visualDensity,
     ScrollbarThemeData? scrollbarTheme,
+    MacosIconButtonThemeData? macosIconButtonTheme,
+    MacosIconThemeData? iconTheme,
   }) {
     return MacosThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -359,11 +400,13 @@ class MacosThemeData with Diagnosticable {
       canvasColor: canvasColor ?? this.canvasColor,
       dividerColor: dividerColor ?? this.dividerColor,
       typography: typography ?? this.typography,
-      pushButtonTheme: this.pushButtonTheme.copyWith(pushButtonTheme),
-      helpButtonTheme: this.helpButtonTheme.copyWith(helpButtonTheme),
-      tooltipTheme: this.tooltipTheme.copyWith(tooltipTheme),
+      pushButtonTheme: this.pushButtonTheme.copyWith(),
+      helpButtonTheme: this.helpButtonTheme.copyWith(),
+      tooltipTheme: this.tooltipTheme.copyWith(),
       visualDensity: visualDensity ?? this.visualDensity,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
+      macosIconButtonTheme: macosIconButtonTheme ?? this.macosIconButtonTheme,
+      iconTheme: iconTheme ?? this.iconTheme,
     );
   }
 
@@ -386,6 +429,15 @@ class MacosThemeData with Diagnosticable {
     ));
     properties.add(
       DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme),
+    );
+    properties.add(
+      DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme),
+    );
+    properties.add(
+      DiagnosticsProperty<MacosIconButtonThemeData>(
+        'macosIconButtonTheme',
+        macosIconButtonTheme,
+      ),
     );
   }
 }

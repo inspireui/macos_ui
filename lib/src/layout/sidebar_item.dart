@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:macos_ui/macos_ui.dart';
 import 'package:macos_ui/src/library.dart';
-import 'package:macos_ui/src/theme/macos_colors.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 const ShapeBorder _defaultShape = const RoundedRectangleBorder(
@@ -143,7 +142,7 @@ class SidebarItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return SizedBox.shrink();
+    if (items.isEmpty) return const SizedBox.shrink();
     assert(debugCheckHasMacosTheme(context));
     assert(currentIndex < _allItems.length);
     final theme = MacosTheme.of(context);
@@ -275,7 +274,7 @@ class _SidebarItem extends StatelessWidget {
           focusNode: item.focusNode,
           descendantsAreFocusable: false,
           enabled: onClick != null,
-          mouseCursor: SystemMouseCursors.click,
+          mouseCursor: SystemMouseCursors.basic,
           actions: _actionMap,
           child: Container(
             width: 134.0 + theme.visualDensity.horizontal,
