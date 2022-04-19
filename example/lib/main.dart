@@ -1,11 +1,9 @@
 import 'package:example/pages/buttons.dart';
 import 'package:example/pages/colors_page.dart';
-import 'package:example/pages/context_menus.dart';
 import 'package:example/pages/dialogs_page.dart';
 import 'package:example/pages/fields.dart';
 import 'package:example/pages/indicators.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 
@@ -58,18 +56,18 @@ class _DemoState extends State<Demo> {
     const IndicatorsPage(),
     const FieldsPage(),
     const ColorsPage(),
-    const ContextMenusPage(),
     const Center(
-        child: MacosIcon(
-      CupertinoIcons.add,
-    )),
+      child: MacosIcon(
+        CupertinoIcons.add,
+      ),
+    ),
     const DialogsPage(),
   ];
 
   Color textLuminance(Color backgroundColor) {
     return backgroundColor.computeLuminance() > 0.5
-        ? Colors.black
-        : Colors.white;
+        ? MacosColors.black
+        : MacosColors.white;
   }
 
   @override
@@ -94,20 +92,20 @@ class _DemoState extends State<Demo> {
             currentIndex: pageIndex,
             onChanged: (i) => setState(() => pageIndex = i),
             scrollController: controller,
-            items: [
-              const SidebarItem(
+            items: const [
+              SidebarItem(
                 leading: MacosIcon(CupertinoIcons.square_on_circle),
                 label: Text('Buttons'),
               ),
-              const SidebarItem(
+              SidebarItem(
                 leading: MacosIcon(CupertinoIcons.arrow_2_circlepath),
                 label: Text('Indicators'),
               ),
-              const SidebarItem(
+              SidebarItem(
                 leading: MacosIcon(CupertinoIcons.textbox),
                 label: Text('Fields'),
               ),
-              const SidebarItem(
+              SidebarItem(
                 label: Text('Disclosure'),
                 disclosureItems: [
                   SidebarItem(
@@ -115,16 +113,12 @@ class _DemoState extends State<Demo> {
                     label: Text('Colors'),
                   ),
                   SidebarItem(
-                    leading: MacosIcon(CupertinoIcons.heart),
-                    label: Text('Context Menus'),
-                  ),
-                  SidebarItem(
                     leading: MacosIcon(CupertinoIcons.infinite),
                     label: Text('Item 3'),
                   ),
                 ],
               ),
-              const SidebarItem(
+              SidebarItem(
                 leading: MacosIcon(CupertinoIcons.rectangle),
                 label: Text('Dialogs & Sheets'),
               ),

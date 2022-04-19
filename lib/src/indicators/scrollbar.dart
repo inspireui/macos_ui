@@ -1,10 +1,9 @@
 import 'dart:ui' show lerpDouble;
 
-import 'package:macos_ui/macos_ui.dart';
-import 'package:macos_ui/src/library.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:macos_ui/macos_ui.dart';
+import 'package:macos_ui/src/library.dart';
 
 /// A Macos Design scrollbar.
 ///
@@ -286,6 +285,8 @@ class ScrollbarThemeData with Diagnosticable {
     Color? hoveringThumbColor,
     Color? draggingThumbColor,
     Color? trackColor,
+    Color? hoveringTrackColor,
+    Color? trackBorderColor,
     Color? hoveringTrackBorderColor,
     double? crossAxisMargin,
     double? mainAxisMargin,
@@ -465,6 +466,28 @@ class ScrollbarThemeData with Diagnosticable {
       minThumbLength,
       defaultValue: null,
     ));
+  }
+
+  ScrollbarThemeData merge(ScrollbarThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      thickness: other.thickness,
+      hoveringThickness: other.hoveringThickness,
+      showTrackOnHover: other.showTrackOnHover,
+      isAlwaysShown: other.isAlwaysShown,
+      interactive: other.interactive,
+      radius: other.radius,
+      thumbColor: other.thumbColor,
+      hoveringThumbColor: other.hoveringThumbColor,
+      draggingThumbColor: other.draggingThumbColor,
+      trackColor: other.trackColor,
+      hoveringTrackColor: other.hoveringTrackColor,
+      trackBorderColor: other.trackBorderColor,
+      hoveringTrackBorderColor: other.hoveringTrackBorderColor,
+      crossAxisMargin: other.crossAxisMargin,
+      mainAxisMargin: other.mainAxisMargin,
+      minThumbLength: other.minThumbLength,
+    );
   }
 }
 

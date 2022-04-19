@@ -1,11 +1,12 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:macos_ui/src/indicators/scrollbar.dart';
 import 'package:macos_ui/src/layout/content_area.dart';
 import 'package:macos_ui/src/layout/resizable_pane.dart';
-import 'package:macos_ui/src/layout/sidebar.dart';
 import 'package:macos_ui/src/layout/scaffold.dart';
+import 'package:macos_ui/src/layout/sidebar.dart';
 import 'package:macos_ui/src/library.dart';
 import 'package:macos_ui/src/theme/macos_theme.dart';
 
@@ -44,6 +45,8 @@ class MacosWindow extends StatefulWidget {
 class _MacosWindowState extends State<MacosWindow> {
   final _sidebarScrollController = ScrollController();
   double _sidebarWidth = 0.0;
+  double _sidebarDragStartWidth = 0.0;
+  double _sidebarDragStartPosition = 0.0;
   bool _showSidebar = true;
   int _sidebarSlideDuration = 0;
   SystemMouseCursor _sidebarCursor = SystemMouseCursors.resizeColumn;
@@ -95,12 +98,23 @@ class _MacosWindowState extends State<MacosWindow> {
     late Color sidebarBackgroundColor;
     Color dividerColor = theme.dividerColor;
 
-    if (!theme.brightness.isDark) {
-      sidebarBackgroundColor = widget.sidebar?.decoration?.color ??
-          CupertinoColors.systemGrey6.color;
+    final isMac = !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
+
+    // Respect the sidebar color override from parent if one is given
+    if (widget.sidebar?.decoration?.color != null) {
+      sidebarBackgroundColor = widget.sidebar!.decoration!.color!;
+    } else if (isMac &&
+        MediaQuery.of(context).platformBrightness.isDark ==
+            theme.brightness.isDark) {
+      // Only show blurry, transparent sidebar when platform brightness and app
+      // brightness are the same, otherwise it looks awful. Also only make the
+      // sidebar transparent on native Mac, or it will just be flat black or
+      // white.
+      sidebarBackgroundColor = Colors.transparent;
     } else {
-      sidebarBackgroundColor = widget.sidebar?.decoration?.color ??
-          CupertinoColors.tertiarySystemBackground.darkColor;
+      sidebarBackgroundColor = theme.brightness.isDark
+          ? CupertinoColors.tertiarySystemBackground.darkColor
+          : CupertinoColors.systemGrey6.color;
     }
 
     final curve = Curves.linearToEaseOut;
@@ -189,18 +203,41 @@ class _MacosWindowState extends State<MacosWindow> {
                 height: height,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
+                  onHorizontalDragStart: (details) {
+                    _sidebarDragStartWidth = _sidebarWidth;
+                    _sidebarDragStartPosition = details.globalPosition.dx;
+                  },
                   onHorizontalDragUpdate: (details) {
+                    final sidebar = widget.sidebar!;
                     setState(() {
+                      var newWidth = _sidebarDragStartWidth +
+                          details.globalPosition.dx -
+                          _sidebarDragStartPosition;
+
+                      if (sidebar.startWidth != null &&
+                          sidebar.snapToStartBuffer != null &&
+                          (newWidth - sidebar.startWidth!).abs() <=
+                              sidebar.snapToStartBuffer!) {
+                        newWidth = sidebar.startWidth!;
+                      }
+
+                      if (sidebar.dragClosed) {
+                        final closeBelow =
+                            sidebar.minWidth - sidebar.dragClosedBuffer;
+                        _showSidebar = newWidth >= closeBelow;
+                      }
+
                       _sidebarWidth = math.max(
-                        widget.sidebar!.minWidth,
+                        sidebar.minWidth,
                         math.min(
-                          math.min(widget.sidebar!.maxWidth!, width),
-                          _sidebarWidth + details.delta.dx,
+                          sidebar.maxWidth!,
+                          newWidth,
                         ),
                       );
-                      if (_sidebarWidth == widget.sidebar!.minWidth)
+
+                      if (_sidebarWidth == sidebar.minWidth)
                         _sidebarCursor = SystemMouseCursors.resizeRight;
-                      else if (_sidebarWidth == widget.sidebar!.maxWidth)
+                      else if (_sidebarWidth == sidebar.maxWidth)
                         _sidebarCursor = SystemMouseCursors.resizeLeft;
                       else
                         _sidebarCursor = SystemMouseCursors.resizeColumn;

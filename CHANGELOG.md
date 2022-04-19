@@ -1,3 +1,45 @@
+## [0.12.3+1]
+* Fix `padding` on `MacosAlertDialog` when `supress` is null [#188](https://github.com/GroovinChip/macos_ui/issues/188)
+
+## [0.12.3]
+* Remove `MacosScrollbar` from `ContentArea` widget (fixes [#170](https://github.com/GroovinChip/macos_ui/issues/170))
+* Remove useless bundled fonts (fixes [#187](https://github.com/GroovinChip/macos_ui/issues/187))
+* Allow users to customize the mouse cursor for sidebar items (fixes [#181](https://github.com/GroovinChip/macos_ui/issues/181))
+* Fix active sidebar item icon color (fixes [#190](https://github.com/GroovinChip/macos_ui/issues/190))
+
+## [0.12.2+2]
+* Added `padding` property to `MacosIconButton` and `MacosIconButtonTheme`.
+
+## [0.12.2+1]
+* Adds missing `merge` methods to `MacosThemeData` and widget `ThemeData` classes, making it possible to use them properly with any number of user-provided custom properties.
+
+## [0.12.2]
+* Fixes `MacosThemeData` to properly apply user-defined `pushButtonTheme`, `helpButtonTheme`, and `tooltipTheme` properties.
+
+## [0.12.1]
+* Sidebar and ResizablePane more precisely track cursor location
+* Sidebar can now be closed by dragging below its minWidth
+* Sidebar can now be configured to snap into place when dragged near its startWidth
+
+## [0.12.0+1]
+* Reverts bundling the `native_context_menu` plugin per [#179](https://github.com/GroovinChip/macos_ui/issues/179)
+
+## [0.12.0]
+* New Widget: `MacosPopupButton`
+
+
+## [0.10.2]
+* Updates to `MacosIconButton` and `MacosBackButton`:
+  * Added a hover effect when mouse moves over the buttons ([#168](https://github.com/GroovinChip/macos_ui/issues/168))
+  * Added `hoverColor` property.
+  * Default shape is now `BoxShape.rectangle` with border radius, as it seems to be the most used in macOS design.
+
+## [0.10.1]
+* Added support for transparent sidebar. Please note that changes to `MainFlutterWindow.swift` are required for this to work. [(#175)](https://github.com/GroovinChip/macos_ui/pull/175)
+
+## [0.10.0+1]
+* Update `native_context_menu` dependency
+
 ## [0.10.0]
 * New widget - `MacosIcon`! `MacosIcon` is identical to regular icons, with the exception that it respects a `MacosTheme`. Also includes corresponding theme classes
 * `MacosThemeData` now sets a global, configurable `iconTheme` for `MacosIcon`s 
