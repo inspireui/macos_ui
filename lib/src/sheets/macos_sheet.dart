@@ -10,12 +10,12 @@ const EdgeInsets _defaultInsetPadding =
 /// interaction with the window until the sheet is dismissed.
 class MacosSheet extends StatelessWidget {
   const MacosSheet({
-    Key? key,
+    super.key,
     required this.child,
     this.insetPadding = _defaultInsetPadding,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -120,12 +120,11 @@ class _MacosSheetRoute<T> extends PopupRoute<T> {
     bool barrierDismissible = false,
     Color? barrierColor = const Color(0x80000000),
     String? barrierLabel,
-    RouteSettings? settings,
+    super.settings,
   })  : _pageBuilder = pageBuilder,
         _barrierDismissible = barrierDismissible,
         _barrierLabel = barrierLabel,
-        _barrierColor = barrierColor,
-        super(settings: settings);
+        _barrierColor = barrierColor;
 
   final RoutePageBuilder _pageBuilder;
 
@@ -182,7 +181,7 @@ class _MacosSheetRoute<T> extends PopupRoute<T> {
     return ScaleTransition(
       scale: CurvedAnimation(
         parent: animation,
-        curve: _SubtleBounceCurve(),
+        curve: const _SubtleBounceCurve(),
       ),
       child: FadeTransition(
         opacity: CurvedAnimation(
@@ -196,7 +195,7 @@ class _MacosSheetRoute<T> extends PopupRoute<T> {
 }
 
 class _SubtleBounceCurve extends Curve {
-  _SubtleBounceCurve();
+  const _SubtleBounceCurve();
 
   @override
   double transform(double t) {

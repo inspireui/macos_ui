@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,79 +12,25 @@ const Offset _kPopupRouteOffset = Offset(-10.0, 5.0);
 const double _kMenuItemHeight = 20.0;
 const double _kMinInteractiveDimension = 24.0;
 const EdgeInsets _kMenuItemPadding = EdgeInsets.symmetric(horizontal: 4.0);
-const Radius _kSideRadius = Radius.circular(7.0);
+const Radius _kSideRadius = Radius.circular(5.0);
 const BorderRadius _kBorderRadius = BorderRadius.all(_kSideRadius);
 const double _kPopupButtonHeight = 20.0;
-const double _kPopupMenuCaretsOffset = 2.0;
 
 /// A builder to customize popup buttons.
 ///
 /// Used by [MacosPopupButton.selectedItemBuilder].
 typedef MacosPopupButtonBuilder = List<Widget> Function(BuildContext context);
 
-class _MacosPopupMenuPainter extends CustomPainter {
-  _MacosPopupMenuPainter({
-    this.color,
-    this.borderColor,
-    this.elevation,
-    this.selectedIndex,
-    this.borderRadius,
-  }) : _painter = BoxDecoration(
-          color: color,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.20),
-              offset: const Offset(0, 2),
-              spreadRadius: 2.0,
-              blurRadius: 6.0,
-            ),
-          ],
-          border: Border.all(
-            color: borderColor!,
-          ),
-          borderRadius: borderRadius ?? _kBorderRadius,
-        ).createBoxPainter();
-
-  final Color? color;
-  final Color? borderColor;
-  final int? elevation;
-  final int? selectedIndex;
-  final BorderRadius? borderRadius;
-  final BoxPainter _painter;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Add 2.0 pixels when painting to take into account when the up/down carets
-    // are shown.
-    final Rect rect = Rect.fromLTRB(
-      0.0,
-      -_kPopupMenuCaretsOffset,
-      size.width,
-      size.height + _kPopupMenuCaretsOffset,
-    );
-
-    _painter.paint(canvas, rect.topLeft, ImageConfiguration(size: rect.size));
-  }
-
-  @override
-  bool shouldRepaint(_MacosPopupMenuPainter oldPainter) {
-    return oldPainter.color != color ||
-        oldPainter.elevation != elevation ||
-        oldPainter.selectedIndex != selectedIndex ||
-        oldPainter.borderRadius != borderRadius;
-  }
-}
-
 // The widget that is the button wrapping the menu items.
 class _MacosPopupMenuItemButton<T> extends StatefulWidget {
   const _MacosPopupMenuItemButton({
-    Key? key,
+    super.key,
     this.padding,
     required this.route,
     required this.buttonRect,
     required this.constraints,
     required this.itemIndex,
-  }) : super(key: key);
+  });
 
   final _MacosPopupRoute<T> route;
   final EdgeInsets? padding;
@@ -114,13 +59,9 @@ class _MacosPopupMenuItemButtonState<T>
         curve: Curves.easeInOut,
         duration: const Duration(milliseconds: 100),
       );
-      setState(() {
-        _isHovered = true;
-      });
+      setState(() => _isHovered = true);
     } else {
-      setState(() {
-        _isHovered = false;
-      });
+      setState(() => _isHovered = false);
     }
   }
 
@@ -139,7 +80,6 @@ class _MacosPopupMenuItemButtonState<T>
   @override
   Widget build(BuildContext context) {
     final brightness = MacosTheme.brightnessOf(context);
-    final MacosThemeData theme = MacosTheme.of(context);
     final MacosPopupMenuItem<T> popupMenuItem =
         widget.route.items[widget.itemIndex].item!;
     Widget child = Container(
@@ -171,8 +111,8 @@ class _MacosPopupMenuItemButtonState<T>
             child: Container(
               decoration: BoxDecoration(
                 color: _isHovered
-                    ? theme.macosPopupButtonTheme.highlightColor
-                    : theme.macosPopupButtonTheme.popupColor,
+                    ? MacosPopupButtonTheme.of(context).highlightColor
+                    : Colors.transparent,
                 borderRadius: _kBorderRadius,
               ),
               child: Row(
@@ -217,7 +157,7 @@ class _MacosPopupMenuItemButtonState<T>
 
 class _MacosPopupMenu<T> extends StatefulWidget {
   const _MacosPopupMenu({
-    Key? key,
+    super.key,
     this.padding,
     required this.route,
     required this.buttonRect,
@@ -225,7 +165,7 @@ class _MacosPopupMenu<T> extends StatefulWidget {
     this.popupColor,
     required this.hasTopItemsNotShown,
     required this.hasBottomItemsNotShown,
-  }) : super(key: key);
+  });
 
   final _MacosPopupRoute<T> route;
   final EdgeInsets? padding;
@@ -275,112 +215,99 @@ class _MacosPopupMenuState<T> extends State<_MacosPopupMenu<T>> {
     ];
     final brightness = MacosTheme.brightnessOf(context);
     final popupColor = MacosDynamicColor.maybeResolve(
-      widget.popupColor ??
-          MacosTheme.of(context).macosPopupButtonTheme.popupColor,
+      widget.popupColor ?? MacosPopupButtonTheme.of(context).popupColor,
       context,
     );
     final caretColor =
-        brightness.resolve(CupertinoColors.white, CupertinoColors.black);
+        brightness.resolve(CupertinoColors.black, CupertinoColors.white);
+
+    final itemsList = ListView.builder(
+      itemCount: children.length,
+      itemBuilder: (context, index) {
+        return children[index];
+      },
+      padding: const EdgeInsets.all(4.0),
+      shrinkWrap: true,
+    );
 
     return FadeTransition(
       opacity: _fadeOpacity,
-      child: CustomPaint(
-        painter: _MacosPopupMenuPainter(
-          color: popupColor,
-          borderColor: brightness.resolve(
-            CupertinoColors.systemGrey3.color,
-            Colors.white.withOpacity(0.15),
+      child: Semantics(
+        scopesRoute: true,
+        namesRoute: true,
+        explicitChildNodes: true,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            scrollbars: false,
+            overscroll: false,
+            physics: const ClampingScrollPhysics(),
+            platform: TargetPlatform.macOS,
           ),
-          elevation: route.elevation,
-          selectedIndex: route.selectedIndex,
-        ),
-        child: Semantics(
-          scopesRoute: true,
-          namesRoute: true,
-          explicitChildNodes: true,
-          child: ScrollConfiguration(
-            // MacosPopup menus show an up or down caret arrow when items
-            // are not visible within the available height.
-            // No scrollbars are shown.
-            behavior: ScrollConfiguration.of(context).copyWith(
-              scrollbars: false,
-              overscroll: false,
-              physics: const ClampingScrollPhysics(),
-              platform: TargetPlatform.macOS,
-            ),
-            child: PrimaryScrollController(
-              controller: widget.route.scrollController!,
-              child: NotificationListener(
-                child: Stack(
-                  alignment: Alignment.center,
+          child: PrimaryScrollController(
+            controller: widget.route.scrollController!,
+            child: NotificationListener(
+              onNotification: (t) {
+                if (t is ScrollUpdateNotification) {
+                  setState(() {
+                    _showTopCaret =
+                        widget.route.scrollController!.position.extentBefore >
+                            widget.buttonRect.height;
+                    _showBottomCaret =
+                        widget.route.scrollController!.position.extentAfter >
+                            widget.buttonRect.height;
+                  });
+                }
+                return true;
+              },
+              child: MacosOverlayFilter(
+                color: popupColor?.withOpacity(0.25),
+                borderRadius: _kBorderRadius,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    ListView.builder(
-                      itemCount: children.length,
-                      itemBuilder: (context, index) {
-                        return children[index];
-                      },
-                      padding: const EdgeInsets.all(4.0),
-                      shrinkWrap: true,
-                    ),
                     _showTopCaret
-                        ? Positioned(
-                            top: 0,
-                            child: Container(
-                              width: widget.buttonRect.width -
-                                  _kPopupMenuCaretsOffset,
-                              height: widget.buttonRect.height,
-                              decoration: BoxDecoration(
-                                color: popupColor,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: _kSideRadius,
-                                  topRight: _kSideRadius,
-                                ),
+                        ? Container(
+                            width: widget.buttonRect.width,
+                            height: widget.buttonRect.height,
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: _kSideRadius,
+                                topRight: _kSideRadius,
                               ),
-                              child: Icon(
-                                CupertinoIcons.chevron_up,
-                                color: caretColor,
-                                size: 14.0,
-                              ),
+                            ),
+                            child: Icon(
+                              CupertinoIcons.chevron_up,
+                              color: caretColor,
+                              size: 12.0,
                             ),
                           )
                         : const SizedBox.shrink(),
+                    // Wrap the items list with an Expanded widget for to
+                    // avoid height overflow when having a lot of items.
+                    _showTopCaret || _showBottomCaret
+                        ? Expanded(
+                            child: itemsList,
+                          )
+                        : itemsList,
                     _showBottomCaret
-                        ? Positioned(
-                            bottom: 0,
-                            child: Container(
-                              width: widget.buttonRect.width -
-                                  _kPopupMenuCaretsOffset,
-                              height: widget.buttonRect.height,
-                              decoration: BoxDecoration(
-                                color: popupColor,
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: _kSideRadius,
-                                  bottomRight: _kSideRadius,
-                                ),
+                        ? Container(
+                            width: widget.buttonRect.width,
+                            height: widget.buttonRect.height,
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: _kSideRadius,
+                                bottomRight: _kSideRadius,
                               ),
-                              child: Icon(
-                                CupertinoIcons.chevron_down,
-                                color: caretColor,
-                                size: 14.0,
-                              ),
+                            ),
+                            child: Icon(
+                              CupertinoIcons.chevron_down,
+                              color: caretColor,
+                              size: 12.0,
                             ),
                           )
                         : const SizedBox.shrink(),
                   ],
                 ),
-                onNotification: (t) {
-                  if (t is ScrollUpdateNotification) {
-                    setState(() {
-                      _showTopCaret =
-                          widget.route.scrollController!.position.extentBefore >
-                              widget.buttonRect.height;
-                      _showBottomCaret =
-                          widget.route.scrollController!.position.extentAfter >
-                              widget.buttonRect.height;
-                    });
-                  }
-                  return true;
-                },
               ),
             ),
           ),
@@ -499,7 +426,6 @@ class _MacosPopupRoute<T> extends PopupRoute<_MacosPopupRouteResult<T>> {
     required this.padding,
     required this.buttonRect,
     required this.selectedIndex,
-    this.elevation = 8,
     required this.capturedThemes,
     required this.style,
     this.barrierLabel,
@@ -515,7 +441,6 @@ class _MacosPopupRoute<T> extends PopupRoute<_MacosPopupRouteResult<T>> {
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
-  final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
@@ -552,7 +477,6 @@ class _MacosPopupRoute<T> extends PopupRoute<_MacosPopupRouteResult<T>> {
           padding: padding,
           buttonRect: buttonRect,
           selectedIndex: selectedIndex,
-          elevation: elevation,
           capturedThemes: capturedThemes,
           style: style,
           popupColor: popupColor,
@@ -606,9 +530,10 @@ class _MacosPopupRoute<T> extends PopupRoute<_MacosPopupRouteResult<T>> {
     double menuTop = (buttonTop - selectedItemOffset) -
         (itemHeights[selectedIndex] - buttonRect.height) / 2.0;
     double preferredMenuHeight = 8.0;
-    if (items.isNotEmpty)
+    if (items.isNotEmpty) {
       preferredMenuHeight +=
           itemHeights.reduce((double total, double height) => total + height);
+    }
 
     // If there are too many elements in the menu, we need to shrink it down
     // so it is at most the computedMaxHeight.
@@ -672,18 +597,17 @@ class _MacosPopupRoute<T> extends PopupRoute<_MacosPopupRouteResult<T>> {
 
 class _MacosPopupRoutePage<T> extends StatelessWidget {
   const _MacosPopupRoutePage({
-    Key? key,
+    super.key,
     required this.route,
     required this.constraints,
     this.items,
     required this.padding,
     required this.buttonRect,
     required this.selectedIndex,
-    this.elevation = 8,
     required this.capturedThemes,
     this.style,
     required this.popupColor,
-  }) : super(key: key);
+  });
 
   final _MacosPopupRoute<T> route;
   final BoxConstraints constraints;
@@ -691,7 +615,6 @@ class _MacosPopupRoutePage<T> extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
-  final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? popupColor;
@@ -708,10 +631,8 @@ class _MacosPopupRoutePage<T> extends StatelessWidget {
     // treating the items as if their heights were all equal to _kMinInteractiveDimension.
     final _MenuLimits menuLimits =
         route.getMenuLimits(buttonRect, constraints.maxHeight, selectedIndex);
-    if (route.scrollController == null) {
-      route.scrollController =
-          ScrollController(initialScrollOffset: menuLimits.scrollOffset);
-    }
+    route.scrollController ??=
+        ScrollController(initialScrollOffset: menuLimits.scrollOffset);
 
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final Widget menu = _MacosPopupMenu<T>(
@@ -753,10 +674,10 @@ class _MacosPopupRoutePage<T> extends StatelessWidget {
 // as closely as possible.
 class _MenuItem<T> extends SingleChildRenderObjectWidget {
   const _MenuItem({
-    Key? key,
+    super.key,
     required this.onLayout,
     required this.item,
-  }) : super(key: key, child: item);
+  }) : super(child: item);
 
   final ValueChanged<Size> onLayout;
   final MacosPopupMenuItem<T>? item;
@@ -795,10 +716,10 @@ class _MacosPopupMenuItemContainer extends StatelessWidget {
   ///
   /// The [child] argument is required.
   const _MacosPopupMenuItemContainer({
-    Key? key,
+    super.key,
     this.alignment = AlignmentDirectional.centerStart,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -836,13 +757,13 @@ class MacosPopupMenuItem<T> extends _MacosPopupMenuItemContainer {
   ///
   /// The [child] argument is required.
   const MacosPopupMenuItem({
-    Key? key,
+    super.key,
     this.onTap,
     this.value,
     this.enabled = true,
-    AlignmentGeometry alignment = AlignmentDirectional.centerStart,
-    required Widget child,
-  }) : super(key: key, alignment: alignment, child: child);
+    super.alignment,
+    required super.child,
+  });
 
   /// Called when the popup menu item is tapped.
   final VoidCallback? onTap;
@@ -901,17 +822,13 @@ class MacosPopupButton<T> extends StatefulWidget {
   /// if it is non-null. If [disabledHint] is null, then [hint] will be displayed
   /// if it is non-null.
   ///
-  /// The [elevation] and [iconSize] arguments must not be null (they both have
-  /// defaults, so do not need to be specified). The boolean [isDense] and
-  /// [isExpanded] arguments must not be null.
-  ///
   /// The [autofocus] argument must not be null.
   ///
   /// The [popupColor] argument specifies the background color of the
   /// popup when it is open. If it is null, the appropriate macOS canvas color
   /// will be used.
   MacosPopupButton({
-    Key? key,
+    super.key,
     required this.items,
     this.selectedItemBuilder,
     this.value,
@@ -919,10 +836,7 @@ class MacosPopupButton<T> extends StatefulWidget {
     this.disabledHint,
     required this.onChanged,
     this.onTap,
-    this.elevation = 8,
     this.style,
-    this.iconDisabledColor,
-    this.iconEnabledColor,
     this.itemHeight = _kMinInteractiveDimension,
     this.focusNode,
     this.autofocus = false,
@@ -942,8 +856,7 @@ class MacosPopupButton<T> extends StatefulWidget {
           'Either zero or 2 or more [MacosPopupMenuItem]s were detected '
           'with the same value',
         ),
-        assert(itemHeight == null || itemHeight >= _kMinInteractiveDimension),
-        super(key: key);
+        assert(itemHeight == null || itemHeight >= _kMinInteractiveDimension);
 
   /// The list of items the user can select.
   ///
@@ -1006,14 +919,6 @@ class MacosPopupButton<T> extends StatefulWidget {
   /// that matches [value] will be displayed.
   final MacosPopupButtonBuilder? selectedItemBuilder;
 
-  /// The z-coordinate at which to place the menu when open.
-  ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12,
-  /// 16, and 24. See [kElevationToShadow].
-  ///
-  /// Defaults to 8, the appropriate elevation for popup buttons.
-  final int elevation;
-
   /// The text style to use for text in the popup button and the popup
   /// menu that appears when you tap the button.
   ///
@@ -1022,18 +927,6 @@ class MacosPopupButton<T> extends StatefulWidget {
   ///
   /// Defaults to MacosTheme.of(context).typography.body.
   final TextStyle? style;
-
-  /// The color of any [Icon] descendant of [icon] if this button is disabled,
-  /// i.e. if [onChanged] is null.
-  ///
-  /// Defaults to [CupertinoColors.quaternaryLabel].
-  final Color? iconDisabledColor;
-
-  /// The color of any [Icon] descendant of [icon] if this button is enabled,
-  /// i.e. if [onChanged] is defined.
-  ///
-  /// Defaults to [MacosTheme.of(context).primaryColor]
-  final Color? iconEnabledColor;
 
   /// If null, then the menu item heights will vary according to each menu item's
   /// intrinsic height.
@@ -1086,9 +979,6 @@ class MacosPopupButton<T> extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('elevation', elevation));
-    properties.add(ColorProperty('iconDisabledColor', iconDisabledColor));
-    properties.add(ColorProperty('iconEnabledColor', iconEnabledColor));
     properties.add(DoubleProperty(
       'itemHeight',
       itemHeight,
@@ -1099,6 +989,7 @@ class MacosPopupButton<T> extends StatefulWidget {
     );
     properties.add(ColorProperty('popupColor', popupColor));
     properties.add(DoubleProperty('menuMaxHeight', menuMaxHeight));
+    properties.add(DiagnosticsProperty('alignment', alignment));
   }
 
   @override
@@ -1109,7 +1000,6 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
     with WidgetsBindingObserver {
   int? _selectedIndex;
   _MacosPopupRoute<T>? _popupRoute;
-  Orientation? _lastOrientation;
   FocusNode? _internalNode;
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
@@ -1137,16 +1027,16 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
       ),
     };
     focusNode!.addListener(_handleFocusChanged);
-    final FocusManager focusManager = WidgetsBinding.instance!.focusManager;
+    final FocusManager focusManager = WidgetsBinding.instance.focusManager;
     _focusHighlightMode = focusManager.highlightMode;
     focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _removeMacosPopupRoute();
-    WidgetsBinding.instance!.focusManager
+    WidgetsBinding.instance.focusManager
         .removeHighlightModeListener(_handleFocusHighlightModeChange);
     focusNode!.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
@@ -1156,14 +1046,11 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
   void _removeMacosPopupRoute() {
     _popupRoute?._dismiss();
     _popupRoute = null;
-    _lastOrientation = null;
   }
 
   void _handleFocusChanged() {
     if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
-      setState(() {
-        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
-      });
+      setState(() => _hasPrimaryFocus = focusNode!.hasPrimaryFocus);
     }
   }
 
@@ -1171,9 +1058,7 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
     if (!mounted) {
       return;
     }
-    setState(() {
-      _focusHighlightMode = mode;
-    });
+    setState(() => _focusHighlightMode = mode);
   }
 
   @override
@@ -1219,8 +1104,8 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
 
   void _handleTap() {
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    final EdgeInsetsGeometry menuMargin =
-        const EdgeInsetsDirectional.only(start: 4.0, end: 4.0);
+    const EdgeInsetsGeometry menuMargin =
+        EdgeInsetsDirectional.only(start: 4.0, end: 4.0);
 
     final List<_MenuItem<T>> menuItems = <_MenuItem<T>>[
       for (int index = 0; index < widget.items!.length; index += 1)
@@ -1255,7 +1140,6 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
       buttonRect: menuMargin.resolve(textDirection).inflateRect(itemRect),
       padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
-      elevation: widget.elevation,
       capturedThemes:
           InheritedTheme.capture(from: context, to: navigator.context),
       style: _textStyle!,
@@ -1276,36 +1160,10 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
     widget.onTap?.call();
   }
 
-  Color? get _iconColor {
-    if (_enabled) {
-      return MacosDynamicColor.maybeResolve(
-        widget.iconEnabledColor ??
-            MacosTheme.of(context).macosPopupButtonTheme.highlightColor,
-        context,
-      );
-    } else {
-      if (widget.iconDisabledColor != null) return widget.iconDisabledColor!;
-      return CupertinoColors.quaternaryLabel;
-    }
-  }
-
   bool get _enabled =>
       widget.items != null &&
       widget.items!.isNotEmpty &&
       widget.onChanged != null;
-
-  Orientation _getOrientation(BuildContext context) {
-    Orientation? result = MediaQuery.maybeOf(context)?.orientation;
-    if (result == null) {
-      // If there's no MediaQuery, then use the window aspect to determine
-      // orientation.
-      final Size size = window.physicalSize;
-      result = size.width > size.height
-          ? Orientation.landscape
-          : Orientation.portrait;
-    }
-    return result;
-  }
 
   bool get _showHighlight {
     switch (_focusHighlightMode) {
@@ -1318,13 +1176,6 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
 
   @override
   Widget build(BuildContext context) {
-    final Orientation newOrientation = _getOrientation(context);
-    _lastOrientation ??= newOrientation;
-    if (newOrientation != _lastOrientation) {
-      _removeMacosPopupRoute();
-      _lastOrientation = newOrientation;
-    }
-
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
     // We should explicitly type the items list to be a list of <Widget>,
@@ -1338,8 +1189,9 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       Widget displayedHint =
           _enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
-      if (widget.selectedItemBuilder == null)
+      if (widget.selectedItemBuilder == null) {
         displayedHint = _MacosPopupMenuItemContainer(child: displayedHint);
+      }
 
       hintIndex = items.length;
       items.add(IgnorePointer(
@@ -1367,16 +1219,15 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
         }).toList(),
       );
     }
-    final brightness = MacosTheme.brightnessOf(context);
-    final borderColor = brightness.resolve(
-      Colors.black.withOpacity(0.12),
-      Colors.black.withOpacity(0.10),
+    final buttonStyles = _getButtonStyles(
+      widget.items != null && widget.items!.isNotEmpty,
+      context,
     );
 
     Widget result = DefaultTextStyle(
-      style: _enabled
-          ? _textStyle!
-          : _textStyle!.copyWith(color: MacosColors.disabledControlTextColor),
+      style: _textStyle!.copyWith(
+        color: buttonStyles.textColor,
+      ),
       child: Container(
         decoration: _showHighlight
             ? const BoxDecoration(
@@ -1386,18 +1237,16 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
             : BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: borderColor,
-                    offset: const Offset(0, 1),
-                    blurRadius: 0,
+                    color: buttonStyles.borderColor,
+                    offset: const Offset(0, .5),
+                    blurRadius: 0.2,
                     spreadRadius: 0,
                   ),
                 ],
-                color: MacosTheme.of(context)
-                    .macosPopupButtonTheme
-                    .backgroundColor,
+                color: buttonStyles.bgColor,
                 border: Border.all(
-                  width: 1,
-                  color: borderColor,
+                  width: 0.5,
+                  color: buttonStyles.borderColor,
                 ),
                 borderRadius: _kBorderRadius,
               ),
@@ -1415,8 +1264,8 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
                 width: _kPopupButtonHeight - 4.0,
                 child: CustomPaint(
                   painter: _UpDownCaretsPainter(
-                    color: MacosColors.white,
-                    backgroundColor: _iconColor ?? MacosColors.appleBlue,
+                    color: buttonStyles.caretColor,
+                    backgroundColor: buttonStyles.caretBgColor,
                   ),
                 ),
               ),
@@ -1448,6 +1297,69 @@ class _MacosPopupButtonState<T> extends State<MacosPopupButton<T>>
   }
 }
 
+// We use this utility function to get the appropriate styling, according to the
+// macOS Design Guidelines and the current MacosPopupButtonTheme.
+_ButtonStyles _getButtonStyles(
+  bool enabled,
+  BuildContext context,
+) {
+  final theme = MacosTheme.of(context);
+  final brightness = theme.brightness;
+  final popupTheme = MacosPopupButtonTheme.of(context);
+  Color textColor = theme.typography.body.color!;
+  Color bgColor = popupTheme.backgroundColor!;
+  Color borderColor = brightness.resolve(
+    const Color(0xffc3c4c9),
+    const Color(0xff222222),
+  );
+  Color caretColor = MacosColors.white;
+  Color caretBgColor = popupTheme.highlightColor!;
+  if (!enabled) {
+    caretBgColor = MacosColors.transparent;
+    textColor = caretColor = brightness.resolve(
+      MacosColors.disabledControlTextColor.color,
+      MacosColors.disabledControlTextColor.darkColor,
+    );
+    bgColor = brightness.resolve(
+      const Color(0xfff2f3f5),
+      const Color(0xff3f4046),
+    );
+    borderColor = brightness.resolve(
+      const Color(0xff979797),
+      const Color(0xff222222),
+    );
+  } else {
+    borderColor = brightness.resolve(
+      const Color(0xffc3c4c9),
+      const Color(0xff222222),
+    );
+    caretBgColor = popupTheme.highlightColor!;
+  }
+  return _ButtonStyles(
+    textColor: textColor,
+    bgColor: bgColor,
+    borderColor: borderColor,
+    caretColor: caretColor,
+    caretBgColor: caretBgColor,
+  );
+}
+
+class _ButtonStyles {
+  _ButtonStyles({
+    required this.textColor,
+    required this.bgColor,
+    required this.borderColor,
+    required this.caretColor,
+    required this.caretBgColor,
+  });
+
+  Color textColor;
+  Color bgColor;
+  Color borderColor;
+  Color caretColor;
+  Color caretBgColor;
+}
+
 class _UpDownCaretsPainter extends CustomPainter {
   const _UpDownCaretsPainter({
     required this.color,
@@ -1459,7 +1371,7 @@ class _UpDownCaretsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final radius = 4.0;
+    const radius = 4.0;
     final vPadding = size.height / 8 + 1.25;
     final hPadding = 2 * size.height / 8 + 1.25;
 
@@ -1472,18 +1384,20 @@ class _UpDownCaretsPainter extends CustomPainter {
     /// Draw carets
     final p1 = Offset(hPadding, size.height / 2 - 2.0);
     final p2 = Offset(size.width / 2, vPadding);
-    final p3 = Offset(size.width - hPadding, size.height / 2 - 2.0);
-    final p4 = Offset(hPadding, size.height / 2 + 2.0);
-    final p5 = Offset(size.width / 2, size.height - vPadding);
-    final p6 = Offset(size.width - hPadding, size.height / 2 + 2.0);
+    final p3 = Offset(size.width / 2 + 1.0, vPadding + 1.0);
+    final p4 = Offset(size.width - hPadding, size.height / 2 - 2.0);
+    final p5 = Offset(hPadding, size.height / 2 + 2.0);
+    final p6 = Offset(size.width / 2, size.height - vPadding);
+    final p7 = Offset(size.width / 2 + 1.0, size.height - vPadding - 1.0);
+    final p8 = Offset(size.width - hPadding, size.height / 2 + 2.0);
     final paint = Paint()
       ..color = color
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 1.6;
     canvas.drawLine(p1, p2, paint);
-    canvas.drawLine(p2, p3, paint);
-    canvas.drawLine(p4, p5, paint);
+    canvas.drawLine(p3, p4, paint);
     canvas.drawLine(p5, p6, paint);
+    canvas.drawLine(p7, p8, paint);
   }
 
   @override
@@ -1491,133 +1405,4 @@ class _UpDownCaretsPainter extends CustomPainter {
 
   @override
   bool shouldRebuildSemantics(_UpDownCaretsPainter oldDelegate) => false;
-}
-
-/// Overrides the default style of its [MacosPopupButton] descendants.
-///
-/// See also:
-///
-///  * [MacosPopupButtonThemeData], which is used to configure this theme.
-class MacosPopupButtonTheme extends InheritedTheme {
-  /// Creates a [MacosPopupButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
-  const MacosPopupButtonTheme({
-    Key? key,
-    required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  /// The configuration of this theme.
-  final MacosPopupButtonThemeData data;
-
-  /// The closest instance of this class that encloses the given context.
-  ///
-  /// If there is no enclosing [MacosPopupButtonTheme] widget, then
-  /// [MacosThemeData.MacosPopupButtonTheme] is used.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// MacosPopupButtonTheme theme = MacosPopupButtonTheme.of(context);
-  /// ```
-  static MacosPopupButtonThemeData of(BuildContext context) {
-    final MacosPopupButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<MacosPopupButtonTheme>();
-    return buttonTheme?.data ?? MacosTheme.of(context).macosPopupButtonTheme;
-  }
-
-  @override
-  Widget wrap(BuildContext context, Widget child) {
-    return MacosPopupButtonTheme(data: data, child: child);
-  }
-
-  @override
-  bool updateShouldNotify(MacosPopupButtonTheme oldWidget) =>
-      data != oldWidget.data;
-}
-
-/// A style that overrides the default appearance of
-/// [MacosPopupButton]s when it is used with [MacosPopupButtonTheme] or with the
-/// overall [MacosTheme]'s [MacosThemeData.MacosPopupButtonTheme].
-///
-/// See also:
-///
-///  * [MacosPopupButtonTheme], the theme which is configured with this class.
-///  * [MacosThemeData.MacosPopupButtonTheme], which can be used to override the default
-///    style for [MacosPopupButton]s below the overall [MacosTheme].
-class MacosPopupButtonThemeData with Diagnosticable {
-  /// Creates a [MacosPopupButtonThemeData].
-  const MacosPopupButtonThemeData({
-    this.highlightColor,
-    this.backgroundColor,
-    this.popupColor,
-  });
-
-  /// The default highlight color for [MacosPopupButton].
-  ///
-  /// Sets the color of the caret icons and the color of a [MacosPopupMenuItem]'s background when the mouse hovers over it.
-  final Color? highlightColor;
-
-  /// The default disabled color for [MacosPopupButton]
-  final Color? backgroundColor;
-
-  /// The default popup menu color for [MacosPopupButton]
-  final Color? popupColor;
-
-  MacosPopupButtonThemeData copyWith({
-    Color? highlightColor,
-    Color? backgroundColor,
-    Color? popupColor,
-  }) {
-    return MacosPopupButtonThemeData(
-      highlightColor: highlightColor ?? this.highlightColor,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      popupColor: popupColor ?? this.popupColor,
-    );
-  }
-
-  /// Linearly interpolates between two [MacosPopupButtonThemeData].
-  ///
-  /// All the properties must be non-null.
-  static MacosPopupButtonThemeData lerp(
-    MacosPopupButtonThemeData a,
-    MacosPopupButtonThemeData b,
-    double t,
-  ) {
-    return MacosPopupButtonThemeData(
-      highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t),
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      popupColor: Color.lerp(a.popupColor, b.popupColor, t),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MacosPopupButtonThemeData &&
-          runtimeType == other.runtimeType &&
-          highlightColor?.value == other.highlightColor?.value &&
-          backgroundColor?.value == other.backgroundColor?.value &&
-          popupColor?.value == other.popupColor?.value;
-
-  @override
-  int get hashCode => highlightColor.hashCode ^ backgroundColor.hashCode;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(ColorProperty('highlightColor', highlightColor));
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(ColorProperty('popupColor', popupColor));
-  }
-
-  MacosPopupButtonThemeData merge(MacosPopupButtonThemeData? other) {
-    if (other == null) return this;
-    return copyWith(
-      highlightColor: other.highlightColor,
-      backgroundColor: other.backgroundColor,
-      popupColor: other.popupColor,
-    );
-  }
 }

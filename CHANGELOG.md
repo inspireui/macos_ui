@@ -1,3 +1,87 @@
+## [1.4.0]
+* Migration to Flutter 3.0
+  * Minimum dart sdk version is now 2.17.0
+  * Use new super parameters feature
+  * Update to `flutter_lints: ^2.0.1` with subsequent fixes
+  * `MacosScrollbar` API more closely matches its material counterpart 
+* Update `MacosColor` to more closely match the `Color` class
+  * Adds `MacosColor.fromARGB` constructor
+  * Adds `MacosColor.fromRGBO` constructor
+  * Adds `alphaBlend` function
+  * Adds `getAlphaFromOpacity` function
+
+## [1.3.0]
+* Add a `top` property to `Sidebar`
+* Tweak the default `primaryColor` value in `MacosThemeData`.
+
+## [1.2.1+1]
+* Fix `MacosApp` documentation
+
+## [1.2.1]
+* Fixes issue with error thrown when toolbar actions are modified programmatically [#239](https://github.com/GroovinChip/macos_ui/issues/239) 
+
+## [1.2.0]
+* Improved styling for `MacosTooltip`:
+  * Better color and shadows.
+  * Displays left-aligned, below the mouse cursor.
+* New widget: `ToolBarDivider` that can be used as a divider (vertical/horizontal line) in the `ToolBar` [#231](https://github.com/GroovinChip/macos_ui/issues/231).
+* All toolbar widgets can now receive a `tooltipMessage` property to display a `MacosTooltip` when user hovers over them [#232](https://github.com/GroovinChip/macos_ui/issues/232).
+
+## [1.1.0+1]
+* Minor improvements to `README.md`
+
+## [1.1.0]
+* New functionality for `MacosSearchField`
+  * Shows a list of search results in an overlay below the field
+  * A result can be selected and customized.
+* A `MacosOverlayFilter` widget can now be used to apply the blurry "frosted glass" effect on surfaces.
+* New widget: `CustomToolbarItem` that enables any widget to be used in the `Toolbar`.
+
+## [1.0.1]
+* Improvements to the graphical `MacosTimePicker`
+  * Better color gradient on the border
+  * Better inner shadow
+  * Minor size adjustments
+  * API improvements
+* Throw an exception if `MacosColorWell` is clicked on a non-macOS platform
+
+## [1.0.0+1]
+* Minor documentation fix for [MacosColorWell]
+
+## [1.0.0]
+* First stable release 🎉
+
+## [0.16.0]
+* New widget: `MacosTimePicker` (textual style only!)
+
+## [0.15.0]
+* New widget: `MacosColorWell`
+
+## [0.14.0]
+* New widget: `ToolBar`, which can be used to create a toolbar at the top of the `MacosScaffold`. Toolbar items include `ToolBarIconButton`, `ToolBarPulldownButton`, and `ToolBarSpacer` widgets.
+* New widget: `MacosSearchField`, which creates a macOS-style search field.
+* Breaking change: the title bar (`TitleBar`) should now be set via the `titlebar` property of `MacosWindow` (was previously a property of `MacosScaffold`). If you are using a title bar in your app, please note a small change you would need to make in your `macos/Runner/MainFlutterWindow.swift` file, described in the "Modern window look" section of the README file.
+* Fix the graphical version of `MacosDatePicker` having an incorrect current day text color in light theme
+
+## [0.13.1]
+* Minor style fixes for `MacosTextField`
+
+## [0.13.0]
+* New widget: `MacosDatePicker`
+
+## [0.12.4+3]
+* Move theme classes to their own files in the `/theme` directory
+
+## [0.12.4+2]
+* Switch over to `flutter_lints`
+
+## [0.12.4+1]
+* Improve visual design of `MacosPopupButton` and `MacosPulldownButton`, to better match the styling and translucency effect of Apple design. 
+* Remove unnecessary properties of `MacosPopupButton`
+
+## [0.12.4]
+* New widget: `MacosPulldownButton`, which can be used as a dropdown for selecting actions with either text or an icon as its title.
+
 ## [0.12.3+1]
 * Fix `padding` on `MacosAlertDialog` when `supress` is null [#188](https://github.com/GroovinChip/macos_ui/issues/188)
 

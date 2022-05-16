@@ -62,20 +62,19 @@ extension MacosDynamicColor on CupertinoDynamicColor {
 
   CupertinoDynamicColor _resolveFrom(BuildContext context) {
     Brightness brightness = Brightness.light;
-    if (this.isPlatformBrightnessDependent) {
+    if (isPlatformBrightnessDependent) {
       brightness = MacosTheme.maybeBrightnessOf(context) ?? Brightness.light;
     }
     bool isHighContrastEnabled = false;
-    if (this.isHighContrastDependent) {
+    if (isHighContrastDependent) {
       isHighContrastEnabled =
           MediaQuery.maybeOf(context)?.highContrast ?? false;
     }
 
-    final CupertinoUserInterfaceLevelData level =
-        this.isInterfaceElevationDependent
-            ? CupertinoUserInterfaceLevel.maybeOf(context) ??
-                CupertinoUserInterfaceLevelData.base
-            : CupertinoUserInterfaceLevelData.base;
+    final CupertinoUserInterfaceLevelData level = isInterfaceElevationDependent
+        ? CupertinoUserInterfaceLevel.maybeOf(context) ??
+            CupertinoUserInterfaceLevelData.base
+        : CupertinoUserInterfaceLevelData.base;
 
     final Color resolved;
     switch (brightness) {
@@ -105,9 +104,9 @@ extension MacosDynamicColor on CupertinoDynamicColor {
         }
     }
 
-    Element? _debugContext;
+    Element? debugContext;
     assert(() {
-      _debugContext = context as Element;
+      debugContext = context as Element;
       return true;
     }());
 
@@ -121,7 +120,7 @@ extension MacosDynamicColor on CupertinoDynamicColor {
       darkElevatedColor,
       highContrastElevatedColor,
       darkHighContrastElevatedColor,
-      _debugContext,
+      debugContext,
     );
   }
 }

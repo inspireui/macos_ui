@@ -1,81 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:macos_ui/src/library.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
-const ShapeBorder _defaultShape = const RoundedRectangleBorder(
-  borderRadius: const BorderRadius.all(const Radius.circular(7.0)),
+const ShapeBorder _defaultShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(7.0)),
 );
-
-/// A macOS style navigation-list item intended for use in a [Sidebar]
-///
-/// See also:
-///
-///  * [Sidebar], a side bar used alongside [MacosScaffold]
-///  * [SidebarItems], the widget that displays [SidebarItem]s vertically
-class SidebarItem with Diagnosticable {
-  /// Creates a sidebar item.
-  const SidebarItem({
-    this.leading,
-    required this.label,
-    this.selectedColor,
-    this.unselectedColor,
-    this.shape,
-    this.focusNode,
-    this.semanticLabel,
-    this.disclosureItems,
-  });
-
-  /// The widget before [label].
-  ///
-  /// Typically an [Icon]
-  final Widget? leading;
-
-  /// Indicates what content this widget represents.
-  ///
-  /// Typically a [Text]
-  final Widget label;
-
-  /// The color to paint this widget as when selected.
-  ///
-  /// If null, [MacosThemeData.primaryColor] is used.
-  final Color? selectedColor;
-
-  /// The color to paint this widget as when unselected.
-  ///
-  /// Defaults to transparent.
-  final Color? unselectedColor;
-
-  /// The [shape] property specifies the outline (border) of the
-  /// decoration. The shape must not be null. It's used alonside
-  /// [selectedColor].
-  final ShapeBorder? shape;
-
-  /// The focus node used by this item.
-  final FocusNode? focusNode;
-
-  /// The semantic label used by screen readers.
-  final String? semanticLabel;
-
-  /// The disclosure items. If null, there will be no disclosure items.
-  ///
-  /// If non-null and [leading] is null, a local animated icon is created
-  final List<SidebarItem>? disclosureItems;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(ColorProperty('selectedColor', selectedColor));
-    properties.add(ColorProperty('unselectedColor', unselectedColor));
-    properties.add(StringProperty('semanticLabel', semanticLabel));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
-    properties.add(IterableProperty<SidebarItem>(
-      'disclosure items',
-      disclosureItems,
-    ));
-  }
-}
 
 /// A scrollable widget that renders [SidebarItem]s.
 ///
@@ -86,7 +15,7 @@ class SidebarItem with Diagnosticable {
 class SidebarItems extends StatelessWidget {
   /// Creates a scrollable widget that renders [SidebarItem]s.
   const SidebarItems({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onChanged,
     required this.items,
@@ -95,8 +24,7 @@ class SidebarItems extends StatelessWidget {
     this.unselectedColor,
     this.shape,
     this.cursor = SystemMouseCursors.basic,
-  })  : assert(currentIndex >= 0),
-        super(key: key);
+  }) : assert(currentIndex >= 0);
 
   /// The [SidebarItem]s used by the sidebar. If no items are provided,
   /// the sidebar is not rendered.
@@ -135,13 +63,13 @@ class SidebarItems extends StatelessWidget {
 
   List<SidebarItem> get _allItems {
     List<SidebarItem> result = [];
-    items.forEach((element) {
+    for (var element in items) {
       if (element.disclosureItems != null) {
         result.addAll(element.disclosureItems!);
       } else {
         result.add(element);
       }
-    });
+    }
     return result;
   }
 
@@ -191,15 +119,14 @@ class SidebarItems extends StatelessWidget {
 }
 
 class _SidebarItemsConfiguration extends InheritedWidget {
+  // ignore: use_super_parameters
   const _SidebarItemsConfiguration({
     Key? key,
-    required this.child,
+    required super.child,
     this.selectedColor = MacosColors.transparent,
     this.unselectedColor = MacosColors.transparent,
     this.shape = _defaultShape,
-  }) : super(key: key, child: child);
-
-  final Widget child;
+  }) : super(key: key);
 
   final Color selectedColor;
   final Color unselectedColor;
@@ -219,6 +146,7 @@ class _SidebarItemsConfiguration extends InheritedWidget {
 /// A macOS style navigation-list item intended for use in a [Sidebar]
 class _SidebarItem extends StatelessWidget {
   /// Builds a [_SidebarItem].
+  // ignore: use_super_parameters
   const _SidebarItem({
     Key? key,
     required this.item,
@@ -298,26 +226,28 @@ class _SidebarItem extends StatelessWidget {
               vertical: 7 + theme.visualDensity.horizontal,
               horizontal: spacing,
             ),
-            child: Row(children: [
-              if (hasLeading)
-                Padding(
-                  padding: EdgeInsets.only(right: spacing),
-                  child: MacosIconTheme.merge(
-                    data: MacosIconThemeData(
-                      color: selected
-                          ? MacosColors.white
-                          : CupertinoColors.systemBlue,
+            child: Row(
+              children: [
+                if (hasLeading)
+                  Padding(
+                    padding: EdgeInsets.only(right: spacing),
+                    child: MacosIconTheme.merge(
+                      data: MacosIconThemeData(
+                        color: selected
+                            ? MacosColors.white
+                            : MacosColors.controlAccentColor,
+                      ),
+                      child: item.leading!,
                     ),
-                    child: item.leading!,
                   ),
+                DefaultTextStyle(
+                  style: theme.typography.title3.copyWith(
+                    color: selected ? textLuminance(selectedColor) : null,
+                  ),
+                  child: item.label,
                 ),
-              DefaultTextStyle(
-                style: theme.typography.title3.copyWith(
-                  color: selected ? textLuminance(selectedColor) : null,
-                ),
-                child: item.label,
-              ),
-            ]),
+              ],
+            ),
           ),
         ),
       ),
@@ -326,6 +256,7 @@ class _SidebarItem extends StatelessWidget {
 }
 
 class _DisclosureSidebarItem extends StatefulWidget {
+  // ignore: use_super_parameters
   _DisclosureSidebarItem({
     Key? key,
     required this.item,
@@ -349,8 +280,10 @@ class _DisclosureSidebarItem extends StatefulWidget {
 
 class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
     with SingleTickerProviderStateMixin {
-  static Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
-  static Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.25);
+  static final Animatable<double> _easeInTween =
+      CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _halfTween =
+      Tween<double>(begin: 0.0, end: 0.25);
 
   late AnimationController _controller;
   late Animation<double> _iconTurns;
@@ -392,8 +325,8 @@ class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
 
   Widget _buildChildren(BuildContext context, Widget? child) {
     final theme = MacosTheme.of(context);
-
     final double spacing = 10.0 + theme.visualDensity.horizontal;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,22 +336,24 @@ class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
           child: _SidebarItem(
             item: SidebarItem(
               label: widget.item.label,
-              leading: Row(children: [
-                if (widget.item.leading != null)
-                  Padding(
-                    padding: EdgeInsets.only(right: spacing),
-                    child: widget.item.leading!,
+              leading: Row(
+                children: [
+                  if (widget.item.leading != null)
+                    Padding(
+                      padding: EdgeInsets.only(right: spacing),
+                      child: widget.item.leading!,
+                    ),
+                  RotationTransition(
+                    turns: _iconTurns,
+                    child: Icon(
+                      CupertinoIcons.chevron_right,
+                      color: theme.brightness == Brightness.light
+                          ? MacosColors.black
+                          : MacosColors.white,
+                    ),
                   ),
-                RotationTransition(
-                  turns: _iconTurns,
-                  child: Icon(
-                    CupertinoIcons.chevron_right,
-                    color: theme.brightness == Brightness.light
-                        ? MacosColors.black
-                        : MacosColors.white,
-                  ),
-                ),
-              ]),
+                ],
+              ),
               unselectedColor: MacosColors.transparent,
               focusNode: widget.item.focusNode,
               semanticLabel: widget.item.semanticLabel,
@@ -447,10 +382,12 @@ class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
     final bool closed = !_isExpanded && _controller.isDismissed;
 
     final Widget result = Offstage(
+      offstage: closed,
       child: TickerMode(
+        enabled: !closed,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: widget.item.disclosureItems!.map((e) {
+          children: widget.item.disclosureItems!.map((item) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 24.0 + theme.visualDensity.horizontal,
@@ -458,19 +395,15 @@ class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
               child: SizedBox(
                 width: double.infinity,
                 child: _SidebarItem(
-                  item: e,
-                  onClick: () {
-                    widget.onChanged?.call(e);
-                  },
-                  selected: widget.selectedItem == e,
+                  item: item,
+                  onClick: () => widget.onChanged?.call(item),
+                  selected: widget.selectedItem == item,
                 ),
               ),
             );
           }).toList(),
         ),
-        enabled: !closed,
       ),
-      offstage: closed,
     );
 
     return AnimatedBuilder(

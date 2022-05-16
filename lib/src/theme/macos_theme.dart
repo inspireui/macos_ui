@@ -21,10 +21,10 @@ class MacosTheme extends StatelessWidget {
   ///
   /// The [data] and [child] parameters must not be null.
   const MacosTheme({
-    Key? key,
+    super.key,
     required this.data,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The [MacosThemeData] styling for this theme.
   final MacosThemeData data;
@@ -120,11 +120,12 @@ class MacosTheme extends StatelessWidget {
 }
 
 class _InheritedMacosTheme extends InheritedWidget {
+  // ignore: use_super_parameters
   const _InheritedMacosTheme({
     Key? key,
     required this.theme,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  }) : super(key: key);
 
   final MacosTheme theme;
 
@@ -194,21 +195,24 @@ class MacosThemeData with Diagnosticable {
     HelpButtonThemeData? helpButtonTheme,
     TooltipThemeData? tooltipTheme,
     VisualDensity? visualDensity,
-    ScrollbarThemeData? scrollbarTheme,
-    MacosIconButtonThemeData? macosIconButtonThemeData,
+    MacosScrollbarThemeData? scrollbarTheme,
+    MacosIconButtonThemeData? macosIconButtonTheme,
     MacosIconThemeData? iconTheme,
-    MacosPopupButtonThemeData? macosPopupButtonTheme,
+    MacosPopupButtonThemeData? popupButtonTheme,
+    MacosPulldownButtonThemeData? pulldownButtonTheme,
+    MacosDatePickerThemeData? datePickerTheme,
+    MacosTimePickerThemeData? timePickerTheme,
+    MacosSearchFieldThemeData? searchFieldTheme,
   }) {
+    // ignore: no_leading_underscores_for_local_identifiers
     final Brightness _brightness = brightness ?? Brightness.light;
     final bool isDark = _brightness == Brightness.dark;
-    primaryColor ??= isDark
-        ? CupertinoColors.activeBlue.darkColor
-        : CupertinoColors.activeBlue.color;
+    primaryColor ??= MacosColors.controlAccentColor;
     canvasColor ??= isDark
         ? CupertinoColors.systemBackground.darkElevatedColor
         : CupertinoColors.systemBackground;
     typography ??= MacosTypography(
-      color: brightness == Brightness.light
+      color: _brightness == Brightness.light
           ? CupertinoColors.black
           : CupertinoColors.white,
     );
@@ -234,8 +238,8 @@ class MacosThemeData with Diagnosticable {
       brightness: _brightness,
       textStyle: typography.callout,
     );
-    scrollbarTheme ??= const ScrollbarThemeData();
-    macosIconButtonThemeData ??= MacosIconButtonThemeData(
+    scrollbarTheme ??= const MacosScrollbarThemeData();
+    macosIconButtonTheme ??= MacosIconButtonThemeData(
       backgroundColor: MacosColors.transparent,
       disabledColor: isDark
           ? const Color(0xff353535)
@@ -259,7 +263,7 @@ class MacosThemeData with Diagnosticable {
       size: 20,
     );
 
-    macosPopupButtonTheme ??= MacosPopupButtonThemeData(
+    popupButtonTheme ??= MacosPopupButtonThemeData(
       highlightColor: isDark
           ? CupertinoColors.activeBlue.darkColor
           : CupertinoColors.activeBlue.color,
@@ -267,6 +271,85 @@ class MacosThemeData with Diagnosticable {
           ? const Color.fromRGBO(255, 255, 255, 0.247)
           : const Color.fromRGBO(255, 255, 255, 1),
       popupColor: isDark
+          ? const Color.fromRGBO(30, 30, 30, 1)
+          : const Color.fromRGBO(242, 242, 247, 1),
+    );
+
+    pulldownButtonTheme ??= MacosPulldownButtonThemeData(
+      highlightColor: isDark
+          ? CupertinoColors.activeBlue.darkColor
+          : CupertinoColors.activeBlue.color,
+      backgroundColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.247)
+          : const Color.fromRGBO(255, 255, 255, 1),
+      pulldownColor: isDark
+          ? const Color.fromRGBO(30, 30, 30, 1)
+          : const Color.fromRGBO(242, 242, 247, 1),
+      iconColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.7)
+          : const Color.fromRGBO(0, 0, 0, 0.7),
+    );
+
+    datePickerTheme = MacosDatePickerThemeData(
+      shadowColor: const Color.fromRGBO(0, 0, 0, 0.1),
+      backgroundColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(255, 255, 255, 1.0),
+      caretColor: isDark ? MacosColors.white : MacosColors.black,
+      caretControlsBackgroundColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(255, 255, 255, 1.0),
+      caretControlsSeparatorColor: isDark
+          ? const Color.fromRGBO(71, 71, 71, 1)
+          : const Color.fromRGBO(0, 0, 0, 0.1),
+      monthViewControlsColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.55)
+          : const Color.fromRGBO(0, 0, 0, 0.5),
+      selectedElementColor: const Color(0xFF0063E1),
+      selectedElementTextColor: MacosColors.white,
+      monthViewDateColor: isDark ? MacosColors.white : MacosColors.black,
+      monthViewHeaderColor: isDark ? MacosColors.white : MacosColors.black,
+      monthViewWeekdayHeaderColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.55)
+          : const Color.fromRGBO(0, 0, 0, 0.5),
+      monthViewCurrentDateColor: isDark
+          ? const Color.fromRGBO(0, 88, 208, 1)
+          : const Color.fromRGBO(0, 99, 255, 1),
+      monthViewSelectedDateColor:
+          isDark ? const MacosColor(0xff464646) : const MacosColor(0xffDCDCDC),
+      monthViewHeaderDividerColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(0, 0, 0, 0.1),
+    );
+
+    timePickerTheme ??= MacosTimePickerThemeData(
+      shadowColor: const Color.fromRGBO(0, 0, 0, 0.1),
+      backgroundColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(255, 255, 255, 1.0),
+      selectedElementColor: const Color(0xFF0063E1),
+      selectedElementTextColor: MacosColors.white,
+      caretColor: isDark ? MacosColors.white : MacosColors.black,
+      caretControlsBackgroundColor: isDark
+          ? const Color.fromRGBO(255, 255, 255, 0.1)
+          : const Color.fromRGBO(255, 255, 255, 1.0),
+      caretControlsSeparatorColor: isDark
+          ? const Color.fromRGBO(71, 71, 71, 1)
+          : const Color.fromRGBO(0, 0, 0, 0.1),
+      clockViewBackgroundColor: MacosColors.white,
+      clockViewBorderColor: const MacosColor(0xFFD1E5ED),
+      dayPeriodTextColor: const MacosColor(0xFFAAAAAA),
+      hourHandColor: MacosColors.black,
+      minuteHandColor: MacosColors.black,
+      secondHandColor: const MacosColor(0xFFFF3B2F),
+      hourTextColor: MacosColors.black,
+    );
+
+    searchFieldTheme ??= MacosSearchFieldThemeData(
+      highlightColor: isDark
+          ? CupertinoColors.activeBlue.darkColor
+          : CupertinoColors.activeBlue.color,
+      resultsBackgroundColor: isDark
           ? const Color.fromRGBO(30, 30, 30, 1)
           : const Color.fromRGBO(242, 242, 247, 1),
     );
@@ -282,9 +365,13 @@ class MacosThemeData with Diagnosticable {
       tooltipTheme: tooltipTheme,
       visualDensity: visualDensity,
       scrollbarTheme: scrollbarTheme,
-      macosIconButtonTheme: macosIconButtonThemeData,
+      iconButtonTheme: macosIconButtonTheme,
       iconTheme: iconTheme,
-      macosPopupButtonTheme: macosPopupButtonTheme,
+      popupButtonTheme: popupButtonTheme,
+      pulldownButtonTheme: pulldownButtonTheme,
+      datePickerTheme: datePickerTheme,
+      timePickerTheme: timePickerTheme,
+      searchFieldTheme: searchFieldTheme,
     );
 
     final customizedData = defaultData.copyWith(
@@ -298,9 +385,12 @@ class MacosThemeData with Diagnosticable {
       tooltipTheme: tooltipTheme,
       visualDensity: visualDensity,
       scrollbarTheme: scrollbarTheme,
-      macosIconButtonTheme: macosIconButtonThemeData,
+      iconButtonTheme: macosIconButtonTheme,
       iconTheme: iconTheme,
-      macosPopupButtonTheme: macosPopupButtonTheme,
+      popupButtonTheme: popupButtonTheme,
+      pulldownButtonTheme: pulldownButtonTheme,
+      datePickerTheme: datePickerTheme,
+      searchFieldTheme: searchFieldTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -323,9 +413,13 @@ class MacosThemeData with Diagnosticable {
     required this.tooltipTheme,
     required this.visualDensity,
     required this.scrollbarTheme,
-    required this.macosIconButtonTheme,
+    required this.iconButtonTheme,
     required this.iconTheme,
-    required this.macosPopupButtonTheme,
+    required this.popupButtonTheme,
+    required this.pulldownButtonTheme,
+    required this.datePickerTheme,
+    required this.timePickerTheme,
+    required this.searchFieldTheme,
   });
 
   /// A default light theme.
@@ -379,16 +473,24 @@ class MacosThemeData with Diagnosticable {
   final VisualDensity visualDensity;
 
   /// The default style for [MacosScrollbar]s below the overall [MacosTheme]
-  final ScrollbarThemeData scrollbarTheme;
+  final MacosScrollbarThemeData scrollbarTheme;
 
   /// The default style for [MacosIconButton]s below the overall [MacosTheme]
-  final MacosIconButtonThemeData macosIconButtonTheme;
+  final MacosIconButtonThemeData iconButtonTheme;
 
   /// The default style for [MacosIcon]s below the overall [MacosTheme]
   final MacosIconThemeData iconTheme;
 
   /// The default style for [MacosPopupButton]s below the overall [MacosTheme]
-  final MacosPopupButtonThemeData macosPopupButtonTheme;
+  final MacosPopupButtonThemeData popupButtonTheme;
+
+  final MacosPulldownButtonThemeData pulldownButtonTheme;
+
+  final MacosDatePickerThemeData datePickerTheme;
+
+  final MacosTimePickerThemeData timePickerTheme;
+
+  final MacosSearchFieldThemeData searchFieldTheme;
 
   /// Linearly interpolate between two themes.
   static MacosThemeData lerp(MacosThemeData a, MacosThemeData b, double t) {
@@ -405,16 +507,36 @@ class MacosThemeData with Diagnosticable {
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t),
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       scrollbarTheme:
-          ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
-      macosIconButtonTheme: MacosIconButtonThemeData.lerp(
-        a.macosIconButtonTheme,
-        b.macosIconButtonTheme,
+          MacosScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
+      iconButtonTheme: MacosIconButtonThemeData.lerp(
+        a.iconButtonTheme,
+        b.iconButtonTheme,
         t,
       ),
       iconTheme: MacosIconThemeData.lerp(a.iconTheme, b.iconTheme, t),
-      macosPopupButtonTheme: MacosPopupButtonThemeData.lerp(
-        a.macosPopupButtonTheme,
-        b.macosPopupButtonTheme,
+      popupButtonTheme: MacosPopupButtonThemeData.lerp(
+        a.popupButtonTheme,
+        b.popupButtonTheme,
+        t,
+      ),
+      pulldownButtonTheme: MacosPulldownButtonThemeData.lerp(
+        a.pulldownButtonTheme,
+        b.pulldownButtonTheme,
+        t,
+      ),
+      datePickerTheme: MacosDatePickerThemeData.lerp(
+        a.datePickerTheme,
+        b.datePickerTheme,
+        t,
+      ),
+      timePickerTheme: MacosTimePickerThemeData.lerp(
+        a.timePickerTheme,
+        b.timePickerTheme,
+        t,
+      ),
+      searchFieldTheme: MacosSearchFieldThemeData.lerp(
+        a.searchFieldTheme,
+        b.searchFieldTheme,
         t,
       ),
     );
@@ -431,10 +553,14 @@ class MacosThemeData with Diagnosticable {
     HelpButtonThemeData? helpButtonTheme,
     TooltipThemeData? tooltipTheme,
     VisualDensity? visualDensity,
-    ScrollbarThemeData? scrollbarTheme,
-    MacosIconButtonThemeData? macosIconButtonTheme,
+    MacosScrollbarThemeData? scrollbarTheme,
+    MacosIconButtonThemeData? iconButtonTheme,
     MacosIconThemeData? iconTheme,
-    MacosPopupButtonThemeData? macosPopupButtonTheme,
+    MacosPopupButtonThemeData? popupButtonTheme,
+    MacosPulldownButtonThemeData? pulldownButtonTheme,
+    MacosDatePickerThemeData? datePickerTheme,
+    MacosTimePickerThemeData? timePickerTheme,
+    MacosSearchFieldThemeData? searchFieldTheme,
   }) {
     return MacosThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -447,11 +573,13 @@ class MacosThemeData with Diagnosticable {
       tooltipTheme: this.tooltipTheme.merge(tooltipTheme),
       visualDensity: visualDensity ?? this.visualDensity,
       scrollbarTheme: this.scrollbarTheme.merge(scrollbarTheme),
-      macosIconButtonTheme:
-          this.macosIconButtonTheme.merge(macosIconButtonTheme),
+      iconButtonTheme: this.iconButtonTheme.merge(iconButtonTheme),
       iconTheme: this.iconTheme.merge(iconTheme),
-      macosPopupButtonTheme:
-          this.macosPopupButtonTheme.merge(macosPopupButtonTheme),
+      popupButtonTheme: this.popupButtonTheme.merge(popupButtonTheme),
+      pulldownButtonTheme: this.pulldownButtonTheme.merge(pulldownButtonTheme),
+      datePickerTheme: this.datePickerTheme.merge(datePickerTheme),
+      timePickerTheme: this.timePickerTheme.merge(timePickerTheme),
+      searchFieldTheme: this.searchFieldTheme.merge(searchFieldTheme),
     );
   }
 
@@ -468,11 +596,13 @@ class MacosThemeData with Diagnosticable {
       tooltipTheme: tooltipTheme.merge(other.tooltipTheme),
       visualDensity: other.visualDensity,
       scrollbarTheme: scrollbarTheme.merge(other.scrollbarTheme),
-      macosIconButtonTheme:
-          macosIconButtonTheme.merge(other.macosIconButtonTheme),
+      iconButtonTheme: iconButtonTheme.merge(other.iconButtonTheme),
       iconTheme: iconTheme.merge(other.iconTheme),
-      macosPopupButtonTheme:
-          macosPopupButtonTheme.merge(other.macosPopupButtonTheme),
+      popupButtonTheme: popupButtonTheme.merge(other.popupButtonTheme),
+      pulldownButtonTheme: pulldownButtonTheme.merge(other.pulldownButtonTheme),
+      datePickerTheme: datePickerTheme.merge(other.datePickerTheme),
+      timePickerTheme: timePickerTheme.merge(other.timePickerTheme),
+      searchFieldTheme: searchFieldTheme.merge(other.searchFieldTheme),
     );
   }
 
@@ -497,18 +627,43 @@ class MacosThemeData with Diagnosticable {
       DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme),
     );
     properties.add(
-      DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme),
+      DiagnosticsProperty<MacosScrollbarThemeData>(
+          'scrollbarTheme', scrollbarTheme),
     );
     properties.add(
       DiagnosticsProperty<MacosIconButtonThemeData>(
-        'macosIconButtonTheme',
-        macosIconButtonTheme,
+        'iconButtonTheme',
+        iconButtonTheme,
       ),
     );
     properties.add(
       DiagnosticsProperty<MacosPopupButtonThemeData>(
-        'macosPopupButtonTheme',
-        macosPopupButtonTheme,
+        'popupButtonTheme',
+        popupButtonTheme,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MacosPulldownButtonThemeData>(
+        'pulldownButtonTheme',
+        pulldownButtonTheme,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MacosDatePickerThemeData>(
+        'datePickerTheme',
+        datePickerTheme,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MacosTimePickerThemeData>(
+        'timePickerTheme',
+        timePickerTheme,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MacosSearchFieldThemeData>(
+        'searchFieldTheme',
+        searchFieldTheme,
       ),
     );
   }

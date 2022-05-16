@@ -6,8 +6,8 @@ import 'package:macos_ui/src/library.dart';
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an macOS-design targeting application. It builds upon a
-/// [WidgetsApp] by macOS specific defaulting such as fonts and scrolling
-/// physics.
+/// [CupertinoApp] by adding macOS specific defaulting such as themes and
+/// scrolling physics.
 ///
 /// The [MacosApp] configures the top-level [Navigator] to search for routes
 /// in the following order:
@@ -39,7 +39,7 @@ class MacosApp extends StatefulWidget {
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const MacosApp({
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.home,
     Map<String, Widget Function(BuildContext)> this.routes =
@@ -74,12 +74,11 @@ class MacosApp extends StatefulWidget {
   })  : routeInformationProvider = null,
         routeInformationParser = null,
         routerDelegate = null,
-        backButtonDispatcher = null,
-        super(key: key);
+        backButtonDispatcher = null;
 
   /// Creates a [MacosApp] that uses the [Router] instead of a [Navigator].
   MacosApp.router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
     required RouteInformationParser<Object> this.routeInformationParser,
     required RouterDelegate<Object> this.routerDelegate,
@@ -113,8 +112,7 @@ class MacosApp extends StatefulWidget {
         onGenerateInitialRoutes = null,
         onUnknownRoute = null,
         routes = null,
-        initialRoute = null,
-        super(key: key);
+        initialRoute = null;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -298,7 +296,7 @@ class MacosApp extends StatefulWidget {
   final MacosThemeData? theme;
 
   @override
-  _MacosAppState createState() => _MacosAppState();
+  State<MacosApp> createState() => _MacosAppState();
 }
 
 class _MacosAppState extends State<MacosApp> {
@@ -312,8 +310,9 @@ class _MacosAppState extends State<MacosApp> {
   }
 
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
+    if (widget.localizationsDelegates != null) {
       yield* widget.localizationsDelegates!;
+    }
     yield DefaultMaterialLocalizations.delegate;
     yield DefaultCupertinoLocalizations.delegate;
     yield DefaultWidgetsLocalizations.delegate;
@@ -416,7 +415,7 @@ class _MacosAppState extends State<MacosApp> {
   }
 }
 
-/// Describes how [Scrollable] widgets behave for [FluentApp]s.
+/// Describes how [Scrollable] widgets behave for [MacosApp]s.
 ///
 /// {@macro flutter.widgets.scrollBehavior}
 ///
@@ -444,8 +443,8 @@ class MacosScrollBehavior extends ScrollBehavior {
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             return MacosScrollbar(
-              child: child,
               controller: details.controller,
+              child: child,
             );
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:

@@ -3,10 +3,10 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:macos_ui/src/library.dart';
 
 class IndicatorsPage extends StatefulWidget {
-  const IndicatorsPage({Key? key}) : super(key: key);
+  const IndicatorsPage({super.key});
 
   @override
-  _IndicatorsPageState createState() => _IndicatorsPageState();
+  State<IndicatorsPage> createState() => _IndicatorsPageState();
 }
 
 class _IndicatorsPageState extends State<IndicatorsPage> {
@@ -16,8 +16,19 @@ class _IndicatorsPageState extends State<IndicatorsPage> {
   @override
   Widget build(BuildContext context) {
     return MacosScaffold(
-      titleBar: const TitleBar(
-        title: Text('macOS UI Indicators'),
+      toolBar: ToolBar(
+        title: const Text('Indicators'),
+        titleWidth: 150.0,
+        actions: [
+          ToolBarIconButton(
+            label: 'Toggle Sidebar',
+            icon: const MacosIcon(
+              CupertinoIcons.sidebar_left,
+            ),
+            onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
+            showLabel: false,
+          ),
+        ],
       ),
       children: [
         ContentArea(builder: (context, scrollController) {

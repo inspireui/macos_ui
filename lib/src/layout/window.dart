@@ -6,7 +6,8 @@ import 'package:macos_ui/src/indicators/scrollbar.dart';
 import 'package:macos_ui/src/layout/content_area.dart';
 import 'package:macos_ui/src/layout/resizable_pane.dart';
 import 'package:macos_ui/src/layout/scaffold.dart';
-import 'package:macos_ui/src/layout/sidebar.dart';
+import 'package:macos_ui/src/layout/sidebar/sidebar.dart';
+import 'package:macos_ui/src/layout/title_bar.dart';
 import 'package:macos_ui/src/library.dart';
 import 'package:macos_ui/src/theme/macos_theme.dart';
 
@@ -21,11 +22,12 @@ class MacosWindow extends StatefulWidget {
   /// The [child] widget is typically a [MacosScaffold] which fills the
   /// rest of the screen.
   const MacosWindow({
-    Key? key,
+    super.key,
     this.child,
+    this.titleBar,
     this.sidebar,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   /// Specifies the background color for the Window.
   ///
@@ -35,11 +37,14 @@ class MacosWindow extends StatefulWidget {
   /// The child of the [MacosWindow]
   final Widget? child;
 
+  /// An app bar to display at the top of the scaffold.
+  final TitleBar? titleBar;
+
   /// A sidebar to display at the left of the scaffold.
   final Sidebar? sidebar;
 
   @override
-  _MacosWindowState createState() => _MacosWindowState();
+  State<MacosWindow> createState() => _MacosWindowState();
 }
 
 class _MacosWindowState extends State<MacosWindow> {
@@ -117,7 +122,7 @@ class _MacosWindowState extends State<MacosWindow> {
           : CupertinoColors.systemGrey6.color;
     }
 
-    final curve = Curves.linearToEaseOut;
+    const curve = Curves.linearToEaseOut;
     final duration = Duration(milliseconds: _sidebarSlideDuration);
 
     return LayoutBuilder(
@@ -154,6 +159,11 @@ class _MacosWindowState extends State<MacosWindow> {
                       if (_sidebarScrollController.hasClients &&
                           _sidebarScrollController.offset > 0.0)
                         Divider(thickness: 1, height: 1, color: dividerColor),
+                      if (widget.sidebar!.top != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: widget.sidebar!.top!,
+                        ),
                       Expanded(
                         child: MacosScrollbar(
                           controller: _sidebarScrollController,
@@ -165,7 +175,10 @@ class _MacosWindowState extends State<MacosWindow> {
                         ),
                       ),
                       if (widget.sidebar?.bottom != null)
-                        widget.sidebar!.bottom!,
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: widget.sidebar!.bottom!,
+                        ),
                     ],
                   ),
                 ),
@@ -189,7 +202,22 @@ class _MacosWindowState extends State<MacosWindow> {
               width: width - visibleSidebarWidth,
               height: height,
               child: ClipRect(
-                child: widget.child ?? const SizedBox.shrink(),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: widget.titleBar != null ? widget.titleBar!.height : 0,
+                  ),
+                  child: widget.child ?? const SizedBox.shrink(),
+                ),
+              ),
+            ),
+
+            // Title bar Area
+            Positioned(
+              left: visibleSidebarWidth,
+              width: width - visibleSidebarWidth,
+              height: widget.titleBar?.height,
+              child: ClipRect(
+                child: widget.titleBar ?? const SizedBox.shrink(),
               ),
             ),
 
@@ -235,12 +263,13 @@ class _MacosWindowState extends State<MacosWindow> {
                         ),
                       );
 
-                      if (_sidebarWidth == sidebar.minWidth)
+                      if (_sidebarWidth == sidebar.minWidth) {
                         _sidebarCursor = SystemMouseCursors.resizeRight;
-                      else if (_sidebarWidth == sidebar.maxWidth)
+                      } else if (_sidebarWidth == sidebar.maxWidth) {
                         _sidebarCursor = SystemMouseCursors.resizeLeft;
-                      else
+                      } else {
                         _sidebarCursor = SystemMouseCursors.resizeColumn;
+                      }
                     });
                   },
                   child: MouseRegion(
@@ -260,7 +289,6 @@ class _MacosWindowState extends State<MacosWindow> {
         );
 
         return MacosWindowScope(
-          child: layout,
           constraints: constraints,
           isSidebarShown: canShowSidebar,
           sidebarToggler: () async {
@@ -269,6 +297,7 @@ class _MacosWindowState extends State<MacosWindow> {
             await Future.delayed(Duration(milliseconds: _sidebarSlideDuration));
             setState(() => _sidebarSlideDuration = 0);
           },
+          child: layout,
         );
       },
     );
@@ -293,13 +322,12 @@ class MacosWindowScope extends InheritedWidget {
   /// The [constraints], [contentAreaWidth], [child], [valueNotifier]
   /// and [_scaffoldState] arguments are required and must not be null.
   const MacosWindowScope({
-    Key? key,
+    super.key,
     required this.constraints,
-    required Widget child,
+    required super.child,
     required this.isSidebarShown,
     required VoidCallback sidebarToggler,
-  })  : _sidebarToggler = sidebarToggler,
-        super(key: key, child: child);
+  }) : _sidebarToggler = sidebarToggler;
 
   /// Provides the constraints from the [MacosWindow] to its descendants.
   final BoxConstraints constraints;
@@ -340,12 +368,12 @@ class MacosWindowScope extends InheritedWidget {
   /// This does not change the current width of the [Sidebar]. It only
   /// hides or shows it.
   void toggleSidebar() {
-    return _sidebarToggler();
+    _sidebarToggler();
   }
 
   @override
-  bool updateShouldNotify(MacosWindowScope old) {
-    return constraints != old.constraints ||
-        isSidebarShown != old.isSidebarShown;
+  bool updateShouldNotify(MacosWindowScope oldWidget) {
+    return constraints != oldWidget.constraints ||
+        isSidebarShown != oldWidget.isSidebarShown;
   }
 }

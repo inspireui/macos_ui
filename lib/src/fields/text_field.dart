@@ -26,7 +26,7 @@ const BorderSide _kDefaultRoundedBorderSide = BorderSide(
     darkColor: Color(0x33FFFFFF),
   ),
   style: BorderStyle.solid,
-  width: 0.0,
+  width: 0.1,
 );
 
 const Border _kDefaultRoundedBorder = Border(
@@ -36,27 +36,31 @@ const Border _kDefaultRoundedBorder = Border(
   right: _kDefaultRoundedBorderSide,
 );
 
-const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
+const BoxDecoration kDefaultRoundedBorderDecoration = BoxDecoration(
   color: CupertinoDynamicColor.withBrightness(
     color: CupertinoColors.white,
     darkColor: CupertinoColors.black,
   ),
   border: _kDefaultRoundedBorder,
+  boxShadow: [
+    BoxShadow(
+      color: CupertinoDynamicColor.withBrightness(
+        color: Color.fromRGBO(0, 0, 0, 0.1),
+        darkColor: Color.fromRGBO(255, 255, 255, 0.1),
+      ),
+      offset: Offset(0, 1),
+    ),
+  ],
   borderRadius: BorderRadius.all(Radius.circular(7.0)),
 );
 
-const BoxDecoration _kDefaultFocusedBorderDecoration = BoxDecoration(
+const BoxDecoration kDefaultFocusedBorderDecoration = BoxDecoration(
   borderRadius: BorderRadius.all(Radius.circular(7.0)),
 );
 
 const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFFAFAFA),
-  darkColor: Color(0xFF050505),
-);
-
-const _kClearButtonColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x33000000),
-  darkColor: Color(0x33FFFFFF),
+  color: Color(0xfff6f6f9),
+  darkColor: Color.fromRGBO(255, 255, 255, 0.01),
 );
 
 // An eyeballed value that moves the cursor slightly left of where it is
@@ -227,12 +231,12 @@ class MacosTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const MacosTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
-    this.decoration = _kDefaultRoundedBorderDecoration,
-    this.focusedDecoration = _kDefaultFocusedBorderDecoration,
-    this.padding = const EdgeInsets.all(6.0),
+    this.decoration = kDefaultRoundedBorderDecoration,
+    this.focusedDecoration = kDefaultFocusedBorderDecoration,
+    this.padding = const EdgeInsets.all(4.0),
     this.placeholder,
     this.placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
@@ -322,8 +326,7 @@ class MacosTextField extends StatefulWidget {
                     cut: true,
                     selectAll: true,
                     paste: true,
-                  )),
-        super(key: key);
+                  ));
 
   /// Creates a borderless macOS-style text field.
   ///
@@ -362,7 +365,7 @@ class MacosTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const MacosTextField.borderless({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.decoration,
@@ -454,8 +457,7 @@ class MacosTextField extends StatefulWidget {
                     cut: true,
                     selectAll: true,
                     paste: true,
-                  )),
-        super(key: key);
+                  ));
 
   /// Controls the text being edited.
   ///
@@ -727,7 +729,7 @@ class MacosTextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _MacosTextFieldState createState() => _MacosTextFieldState();
+  State<MacosTextField> createState() => _MacosTextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -745,7 +747,7 @@ class MacosTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<BoxDecoration>(
       'decoration',
       decoration,
-      defaultValue: _kDefaultRoundedBorderDecoration,
+      defaultValue: kDefaultRoundedBorderDecoration,
     ));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
@@ -986,8 +988,9 @@ class _MacosTextFieldState extends State<MacosTextField>
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
       return false;
+    }
 
     // On macOS, we don't show handles when the selection is collapsed.
     if (_effectiveController.selection.isCollapsed) return false;
@@ -1087,6 +1090,13 @@ class _MacosTextFieldState extends State<MacosTextField>
       return editableText;
     }
 
+    Color iconsColor = MacosTheme.of(context).brightness.isDark
+        ? const Color.fromRGBO(255, 255, 255, 0.55)
+        : const Color.fromRGBO(0, 0, 0, 0.5);
+    if (widget.enabled != null && widget.enabled == false) {
+      iconsColor = iconsColor.withOpacity(0.2);
+    }
+
     // Otherwise, listen to the current state of the text entry.
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _effectiveController,
@@ -1107,7 +1117,13 @@ class _MacosTextFieldState extends State<MacosTextField>
                   left: 6.0,
                   right: 6.0,
                 ),
-                child: widget.prefix!,
+                child: MacosIconTheme(
+                  data: MacosIconThemeData(
+                    color: iconsColor,
+                    size: 16.0,
+                  ),
+                  child: widget.prefix!,
+                ),
               ),
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
@@ -1152,8 +1168,9 @@ class _MacosTextFieldState extends State<MacosTextField>
                           final bool textChanged =
                               _effectiveController.text.isNotEmpty;
                           _effectiveController.clear();
-                          if (widget.onChanged != null && textChanged)
+                          if (widget.onChanged != null && textChanged) {
                             widget.onChanged!(_effectiveController.text);
+                          }
                         }
                       : null,
                   child: Padding(
@@ -1165,11 +1182,8 @@ class _MacosTextFieldState extends State<MacosTextField>
                     ),
                     child: Icon(
                       CupertinoIcons.clear_thick_circled,
-                      size: 18.0,
-                      color: MacosDynamicColor.resolve(
-                        _kClearButtonColor,
-                        context,
-                      ),
+                      size: 16.0,
+                      color: iconsColor,
                     ),
                   ),
                 ),
@@ -1240,18 +1254,31 @@ class _MacosTextFieldState extends State<MacosTextField>
       ),
     );
 
-    final placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
+    final placeholderStyle = textStyle.merge(enabled
+        ? resolvedPlaceholderStyle
+        : resolvedPlaceholderStyle!
+            .copyWith(color: resolvedPlaceholderStyle.color!.withOpacity(0.2)));
 
     final Brightness keyboardAppearance =
         widget.keyboardAppearance ?? MacosTheme.brightnessOf(context);
-    final Color cursorColor =
-        MacosDynamicColor.maybeResolve(widget.cursorColor, context) ??
-            themeData.primaryColor;
+    Color? cursorColor;
+    cursorColor = MacosDynamicColor.maybeResolve(widget.cursorColor, context);
+    cursorColor ??=
+        themeData.brightness.isDark ? MacosColors.white : MacosColors.black;
     final Color disabledColor =
         MacosDynamicColor.resolve(_kDisabledBackground, context);
 
-    final Color? decorationColor =
+    Color? decorationColor =
         MacosDynamicColor.maybeResolve(widget.decoration?.color, context);
+    if (decorationColor.runtimeType == ResolvedMacosDynamicColor) {
+      if ((decorationColor as ResolvedMacosDynamicColor).color ==
+              const Color(0xffffffff) ||
+          (decorationColor).darkColor == const Color(0xff000000)) {
+        decorationColor = themeData.brightness.isDark
+            ? const Color.fromRGBO(30, 30, 30, 1)
+            : MacosColors.white;
+      }
+    }
 
     final BoxBorder? border = widget.decoration?.border;
     Border? resolvedBorder = border as Border?;
@@ -1276,11 +1303,16 @@ class _MacosTextFieldState extends State<MacosTextField>
 
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
       border: resolvedBorder,
-      color: enabled ? decorationColor : (decorationColor ?? disabledColor),
+      color: enabled ? decorationColor : disabledColor,
     );
 
     final BoxDecoration? focusedDecoration = widget.focusedDecoration?.copyWith(
-      border: Border.all(width: 3.0, color: themeData.primaryColor),
+      border: Border.all(
+        width: 3.0,
+        color: themeData.brightness.isDark
+            ? const Color.fromRGBO(26, 169, 255, 0.3)
+            : const Color.fromRGBO(0, 103, 244, 0.25),
+      ),
     );
 
     final focusedPlaceholderDecoration = focusedDecoration?.copyWith(

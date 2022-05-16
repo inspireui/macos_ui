@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:macos_ui/macos_ui.dart';
@@ -25,13 +24,12 @@ class MacosTooltip extends StatefulWidget {
   /// Wrap any widget in a [MacosTooltip] to show a message on mouse hover or
   /// long press event
   const MacosTooltip({
-    Key? key,
+    super.key,
     required this.message,
     this.child,
-    this.style,
     this.excludeFromSemantics = false,
     this.useMousePosition = true,
-  }) : super(key: key);
+  });
 
   /// The text to display in the tooltip.
   final String message;
@@ -39,10 +37,6 @@ class MacosTooltip extends StatefulWidget {
   /// The widget the tooltip will be displayed, either above or below,
   /// when the mouse is hovering or whenever it gets long pressed.
   final Widget? child;
-
-  /// The style of the tooltip. If non-null, it's mescled with
-  /// [ThemeData.tooltipThemeData]
-  final TooltipThemeData? style;
 
   /// Whether the tooltip's [message] should be excluded from the
   /// semantics tree.
@@ -62,17 +56,13 @@ class MacosTooltip extends StatefulWidget {
   final bool useMousePosition;
 
   @override
-  _MacosTooltipState createState() => _MacosTooltipState();
+  State<MacosTooltip> createState() => _MacosTooltipState();
 }
 
 class _MacosTooltipState extends State<MacosTooltip>
     with SingleTickerProviderStateMixin {
-  static const double _defaultVerticalOffset = 24.0;
-  static const bool _defaultPreferBelow = false;
-  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.all(0.0);
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
-  static const Duration _defaultWaitDuration = Duration.zero;
 
   late double height;
   late EdgeInsetsGeometry padding;
@@ -95,63 +85,18 @@ class _MacosTooltipState extends State<MacosTooltip>
   @override
   void initState() {
     super.initState();
-    _mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
     _controller = AnimationController(
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
-    RendererBinding.instance!.mouseTracker
+    RendererBinding.instance.mouseTracker
         .addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
-  }
-
-  Duration _getDefaultShowDuration() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const Duration(seconds: 10);
-      default:
-        return const Duration(milliseconds: 1500);
-    }
-  }
-
-  // https://material.io/components/tooltips#specs
-  double _getDefaultTooltipHeight() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return 24.0;
-      default:
-        return 32.0;
-    }
-  }
-
-  EdgeInsets _getDefaultPadding() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const EdgeInsets.symmetric(horizontal: 8.0);
-      default:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
-    }
-  }
-
-  double _getDefaultFontSize() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return 10.0;
-      default:
-        return 14.0;
-    }
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   // Forces a rebuild if a mouse has been added or removed.
@@ -160,7 +105,7 @@ class _MacosTooltipState extends State<MacosTooltip>
       return;
     }
     final bool mouseIsConnected =
-        RendererBinding.instance!.mouseTracker.mouseIsConnected;
+        RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
       setState(() {
         _mouseIsConnected = mouseIsConnected;
@@ -293,9 +238,9 @@ class _MacosTooltipState extends State<MacosTooltip>
 
   @override
   void dispose() {
-    GestureBinding.instance!.pointerRouter
+    GestureBinding.instance.pointerRouter
         .removeGlobalRoute(_handlePointerEvent);
-    RendererBinding.instance!.mouseTracker
+    RendererBinding.instance.mouseTracker
         .removeListener(_handleMouseTrackerChange);
     if (_entry != null) _removeEntry();
     _controller.dispose();
@@ -312,40 +257,18 @@ class _MacosTooltipState extends State<MacosTooltip>
   Widget build(BuildContext context) {
     assert(debugCheckHasMacosTheme(context));
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
-    final MacosThemeData theme = MacosTheme.of(context);
-    final tooltipTheme = theme.tooltipTheme.copyWith();
-    final TextStyle? defaultTextStyle;
-    final BoxDecoration defaultDecoration;
-    if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.typography.body.copyWith(
-        color: CupertinoColors.black,
-        fontSize: _getDefaultFontSize(),
-      );
-      defaultDecoration = BoxDecoration(
-        color: CupertinoColors.white.withOpacity(0.9),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      );
-    } else {
-      defaultTextStyle = theme.typography.body.copyWith(
-        color: CupertinoColors.white,
-        fontSize: _getDefaultFontSize(),
-      );
-      defaultDecoration = BoxDecoration(
-        color: CupertinoColors.black.withOpacity(0.9),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      );
-    }
+    final tooltipTheme = TooltipTheme.of(context);
 
-    height = tooltipTheme.height ?? _getDefaultTooltipHeight();
-    padding = tooltipTheme.padding ?? _getDefaultPadding();
-    margin = tooltipTheme.margin ?? _defaultMargin;
-    verticalOffset = tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
-    preferBelow = tooltipTheme.preferBelow ?? _defaultPreferBelow;
+    height = tooltipTheme.height!;
+    padding = tooltipTheme.padding!;
+    margin = tooltipTheme.margin!;
+    verticalOffset = tooltipTheme.verticalOffset!;
+    preferBelow = tooltipTheme.preferBelow!;
     excludeFromSemantics = widget.excludeFromSemantics;
-    decoration = tooltipTheme.decoration ?? defaultDecoration;
-    textStyle = tooltipTheme.textStyle ?? defaultTextStyle;
-    waitDuration = tooltipTheme.waitDuration ?? _defaultWaitDuration;
-    showDuration = tooltipTheme.showDuration ?? _getDefaultShowDuration();
+    decoration = tooltipTheme.decoration!;
+    textStyle = tooltipTheme.textStyle!;
+    waitDuration = tooltipTheme.waitDuration!;
+    showDuration = tooltipTheme.showDuration!;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -370,226 +293,6 @@ class _MacosTooltipState extends State<MacosTooltip>
     }
 
     return result;
-  }
-}
-
-class TooltipThemeData with Diagnosticable {
-  const TooltipThemeData({
-    this.height,
-    this.verticalOffset,
-    this.padding,
-    this.margin,
-    this.preferBelow,
-    this.decoration,
-    this.showDuration,
-    this.waitDuration,
-    this.textStyle,
-  });
-
-  /// Creates a default tooltip theme.
-  ///
-  /// [textStyle] is usually [MacosTypography.caption2]
-  factory TooltipThemeData.standard({
-    required Brightness brightness,
-    required TextStyle textStyle,
-  }) {
-    return TooltipThemeData(
-      height: 32.0,
-      verticalOffset: 24.0,
-      preferBelow: false,
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      waitDuration: const Duration(seconds: 1),
-      textStyle: textStyle,
-      decoration: () {
-        const radius = BorderRadius.zero;
-        final shadow = kElevationToShadow[4];
-        if (brightness == Brightness.light) {
-          return BoxDecoration(
-            color: CupertinoColors.systemGrey6.color,
-            borderRadius: radius,
-            boxShadow: shadow,
-          );
-        } else {
-          return BoxDecoration(
-            color: CupertinoColors.systemGrey6.darkColor,
-            borderRadius: radius,
-            boxShadow: shadow,
-          );
-        }
-      }(),
-    );
-  }
-
-  /// Copy this tooltip with [style]
-  TooltipThemeData copyWith({
-    Decoration? decoration,
-    double? height,
-    EdgeInsetsGeometry? margin,
-    EdgeInsetsGeometry? padding,
-    bool? preferBelow,
-    Duration? showDuration,
-    TextStyle? textStyle,
-    double? verticalOffset,
-    Duration? waitDuration,
-  }) {
-    return TooltipThemeData(
-      decoration: decoration ?? this.decoration,
-      height: height ?? this.height,
-      margin: margin ?? this.margin,
-      padding: padding ?? this.padding,
-      preferBelow: preferBelow ?? this.preferBelow,
-      showDuration: showDuration ?? this.showDuration,
-      textStyle: textStyle ?? this.textStyle,
-      verticalOffset: verticalOffset ?? this.verticalOffset,
-      waitDuration: waitDuration ?? this.waitDuration,
-    );
-  }
-
-  /// The height of the tooltip's [child].
-  ///
-  /// If the [child] is null, then this is the tooltip's intrinsic height.
-  final double? height;
-
-  /// The vertical gap between the widget and the displayed tooltip.
-  ///
-  /// When [preferBelow] is set to true and tooltips have sufficient space
-  /// to display themselves, this property defines how much vertical space
-  /// tooltips will position themselves under their corresponding widgets.
-  /// Otherwise, tooltips will position themselves above their corresponding
-  /// widgets with the given offset.
-  final double? verticalOffset;
-
-  /// The amount of space by which to inset the tooltip's [child].
-  ///
-  /// Defaults to 10.0 logical pixels in each direction.
-  final EdgeInsetsGeometry? padding;
-
-  /// The empty space that surrounds the tooltip.
-  ///
-  /// Defines the tooltip's outer [Container.margin]. By default, a long
-  /// tooltip will span the width of its window. If long enough, a tooltip
-  /// might also span the window's height. This property allows one to define
-  /// how much space the tooltip must be inset from the edges of their display
-  /// window.
-  final EdgeInsetsGeometry? margin;
-
-  /// Whether the tooltip defaults to being displayed below the widget.
-  ///
-  /// Defaults to true. If there is insufficient space to display the tooltip
-  /// in the preferred direction, the tooltip will be displayed in the opposite
-  /// direction.
-  final bool? preferBelow;
-
-  /// Specifies the tooltip's shape and background color.
-  ///
-  /// The tooltip shape defaults to a rounded rectangle with a border radius of 4.0.
-  /// Tooltips will also default to an opacity of 90% and with the color [CupertinoColors.systemGrey]
-  /// if [ThemeData.brightness] is [Brightness.dark], and [CupertinoColors.white] if
-  /// it is [Brightness.light].
-  final Decoration? decoration;
-
-  /// The length of time that a pointer must hover over a tooltip's widget before
-  /// the tooltip will be shown.
-  ///
-  /// Once the pointer leaves the widget, the tooltip will immediately disappear.
-  ///
-  /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
-  final Duration? waitDuration;
-
-  /// The length of time that the tooltip will be shown after a long press is released.
-  ///
-  /// If on desktop, defaults to 10 seconds, otherwise, defaults to 1.5 seconds.
-  final Duration? showDuration;
-
-  /// The style to use for the message of the tooltip.
-  ///
-  /// If null, [MacosTypography.caption] is used
-  final TextStyle? textStyle;
-
-  /// Linearly interpolate between two tooltip themes.
-  ///
-  /// All the properties must be non-null.
-  static TooltipThemeData lerp(
-    TooltipThemeData a,
-    TooltipThemeData b,
-    double t,
-  ) {
-    return TooltipThemeData(
-      decoration: Decoration.lerp(a.decoration, b.decoration, t),
-      height: t < 0.5 ? a.height : b.height,
-      margin: EdgeInsetsGeometry.lerp(a.margin, b.margin, t),
-      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
-      preferBelow: t < 0.5 ? a.preferBelow : b.preferBelow,
-      showDuration: t < 0.5 ? a.showDuration : b.showDuration,
-      textStyle: TextStyle.lerp(a.textStyle, b.textStyle, t),
-      verticalOffset: t < 0.5 ? a.verticalOffset : b.verticalOffset,
-      waitDuration: t < 0.5 ? a.waitDuration : b.waitDuration,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TooltipThemeData &&
-          runtimeType == other.runtimeType &&
-          height == other.height &&
-          verticalOffset == other.verticalOffset &&
-          padding == other.padding &&
-          margin == other.margin &&
-          preferBelow == other.preferBelow &&
-          decoration == other.decoration &&
-          waitDuration == other.waitDuration &&
-          showDuration == other.showDuration &&
-          textStyle == other.textStyle;
-
-  @override
-  int get hashCode =>
-      height.hashCode ^
-      verticalOffset.hashCode ^
-      padding.hashCode ^
-      margin.hashCode ^
-      preferBelow.hashCode ^
-      decoration.hashCode ^
-      waitDuration.hashCode ^
-      showDuration.hashCode ^
-      textStyle.hashCode;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DoubleProperty('height', height));
-    properties.add(DoubleProperty('verticalOffset', verticalOffset));
-    properties.add(
-      DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding),
-    );
-    properties.add(
-      DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin),
-    );
-    properties.add(FlagProperty(
-      'preferBelow',
-      value: preferBelow,
-      ifFalse: 'prefer above',
-    ));
-    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration));
-    properties.add(DiagnosticsProperty<Duration>('waitDuration', waitDuration));
-    properties.add(DiagnosticsProperty<Duration>('showDuration', showDuration));
-    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle));
-  }
-
-  TooltipThemeData merge(TooltipThemeData? other) {
-    if (other == null) return this;
-    return copyWith(
-      decoration: other.decoration,
-      height: other.height,
-      margin: other.margin,
-      padding: other.padding,
-      preferBelow: other.preferBelow,
-      showDuration: other.showDuration,
-      textStyle: other.textStyle,
-      verticalOffset: other.verticalOffset,
-      waitDuration: other.waitDuration,
-    );
   }
 }
 
@@ -628,7 +331,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     return positionDependentBox(
       size: size,
       childSize: childSize,
-      target: target,
+      target: Offset(target.dx + childSize.width / 2, target.dy),
       verticalOffset: verticalOffset,
       preferBelow: preferBelow,
     );
@@ -643,6 +346,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 }
 
 class _TooltipOverlay extends StatelessWidget {
+  // ignore: use_super_parameters
   const _TooltipOverlay({
     Key? key,
     required this.message,
@@ -682,19 +386,16 @@ class _TooltipOverlay extends StatelessWidget {
             opacity: animation,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
-              child: DefaultTextStyle(
-                style: MacosTheme.of(context).typography.body,
-                child: Container(
-                  decoration: decoration,
-                  padding: padding,
-                  margin: margin,
-                  child: Center(
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: Text(
-                      message,
-                      style: textStyle,
-                    ),
+              child: Container(
+                decoration: decoration,
+                padding: padding,
+                margin: margin,
+                child: Center(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: Text(
+                    message,
+                    style: textStyle,
                   ),
                 ),
               ),

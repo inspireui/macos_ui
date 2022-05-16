@@ -1,8 +1,10 @@
-import 'package:example/pages/buttons.dart';
+import 'package:example/pages/buttons_page.dart';
 import 'package:example/pages/colors_page.dart';
 import 'package:example/pages/dialogs_page.dart';
-import 'package:example/pages/fields.dart';
-import 'package:example/pages/indicators.dart';
+import 'package:example/pages/fields_page.dart';
+import 'package:example/pages/indicators_page.dart';
+import 'package:example/pages/selectors_page.dart';
+import 'package:example/pages/toolbar_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
@@ -10,11 +12,11 @@ import 'package:provider/provider.dart';
 import 'theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MacosUIGalleryApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MacosUIGalleryApp extends StatelessWidget {
+  const MacosUIGalleryApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,31 +25,33 @@ class MyApp extends StatelessWidget {
       builder: (context, _) {
         final appTheme = context.watch<AppTheme>();
         return MacosApp(
-          title: 'macos_ui example',
+          title: 'macos_ui Widget Gallery',
           theme: MacosThemeData.light(),
           darkTheme: MacosThemeData.dark(),
           themeMode: appTheme.mode,
           debugShowCheckedModeBanner: false,
-          home: const Demo(),
+          home: const WidgetGallery(),
         );
       },
     );
   }
 }
 
-class Demo extends StatefulWidget {
-  const Demo({Key? key}) : super(key: key);
+class WidgetGallery extends StatefulWidget {
+  const WidgetGallery({super.key});
 
   @override
-  _DemoState createState() => _DemoState();
+  State<WidgetGallery> createState() => _WidgetGalleryState();
 }
 
-class _DemoState extends State<Demo> {
+class _WidgetGalleryState extends State<WidgetGallery> {
   double ratingValue = 0;
   double sliderValue = 0;
   bool value = false;
 
   int pageIndex = 0;
+
+  late final searchFieldController = TextEditingController();
 
   final List<Widget> pages = [
     CupertinoTabView(
@@ -62,69 +66,165 @@ class _DemoState extends State<Demo> {
       ),
     ),
     const DialogsPage(),
+    const ToolbarPage(),
+    const SelectorsPage(),
   ];
-
-  Color textLuminance(Color backgroundColor) {
-    return backgroundColor.computeLuminance() > 0.5
-        ? MacosColors.black
-        : MacosColors.white;
-  }
 
   @override
   Widget build(BuildContext context) {
-    return MacosWindow(
-      child: IndexedStack(
-        index: pageIndex,
-        children: pages,
-      ),
-      sidebar: Sidebar(
-        minWidth: 200,
-        bottom: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: MacosListTile(
+    return PlatformMenuBar(
+      menus: const [
+        PlatformMenu(
+          label: 'macos_ui Widget Gallery',
+          menus: [
+            PlatformProvidedMenuItem(
+              type: PlatformProvidedMenuItemType.about,
+            ),
+            PlatformProvidedMenuItem(
+              type: PlatformProvidedMenuItemType.quit,
+            ),
+          ],
+        ),
+        PlatformMenu(
+          label: 'View',
+          menus: [
+            PlatformProvidedMenuItem(
+              type: PlatformProvidedMenuItemType.toggleFullScreen,
+            ),
+          ],
+        ),
+        PlatformMenu(
+          label: 'Window',
+          menus: [
+            PlatformProvidedMenuItem(
+              type: PlatformProvidedMenuItemType.minimizeWindow,
+            ),
+            PlatformProvidedMenuItem(
+              type: PlatformProvidedMenuItemType.zoomWindow,
+            ),
+          ],
+        ),
+      ],
+      body: MacosWindow(
+        sidebar: Sidebar(
+          top: MacosSearchField(
+            placeholder: 'Search',
+            controller: searchFieldController,
+            onResultSelected: (result) {
+              switch (result.searchKey) {
+                case 'Buttons':
+                  setState(() {
+                    pageIndex = 0;
+                    searchFieldController.clear();
+                  });
+                  break;
+                case 'Indicators':
+                  setState(() {
+                    pageIndex = 1;
+                    searchFieldController.clear();
+                  });
+                  break;
+                case 'Fields':
+                  setState(() {
+                    pageIndex = 2;
+                    searchFieldController.clear();
+                  });
+                  break;
+                case 'Colors':
+                  setState(() {
+                    pageIndex = 3;
+                    searchFieldController.clear();
+                  });
+                  break;
+                case 'Dialogs and Sheets':
+                  setState(() {
+                    pageIndex = 5;
+                    searchFieldController.clear();
+                  });
+                  break;
+                case 'Toolbar':
+                  setState(() {
+                    pageIndex = 6;
+                    searchFieldController.clear();
+                  });
+                  break;
+                case 'Selectors':
+                  setState(() {
+                    pageIndex = 7;
+                    searchFieldController.clear();
+                  });
+                  break;
+                default:
+                  searchFieldController.clear();
+              }
+            },
+            results: const [
+              SearchResultItem('Buttons'),
+              SearchResultItem('Indicators'),
+              SearchResultItem('Fields'),
+              SearchResultItem('Colors'),
+              SearchResultItem('Dialogs and Sheets'),
+              SearchResultItem('Toolbar'),
+              SearchResultItem('Selectors'),
+            ],
+          ),
+          minWidth: 200,
+          builder: (context, controller) {
+            return SidebarItems(
+              currentIndex: pageIndex,
+              onChanged: (i) => setState(() => pageIndex = i),
+              scrollController: controller,
+              items: const [
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.square_on_circle),
+                  label: Text('Buttons'),
+                ),
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.arrow_2_circlepath),
+                  label: Text('Indicators'),
+                ),
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.textbox),
+                  label: Text('Fields'),
+                ),
+                SidebarItem(
+                  label: Text('Disclosure'),
+                  disclosureItems: [
+                    SidebarItem(
+                      leading: MacosIcon(CupertinoIcons.infinite),
+                      label: Text('Colors'),
+                    ),
+                    SidebarItem(
+                      leading: MacosIcon(CupertinoIcons.infinite),
+                      label: Text('Item 3'),
+                    ),
+                  ],
+                ),
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.rectangle),
+                  label: Text('Dialogs & Sheets'),
+                ),
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.macwindow),
+                  label: Text('Toolbar'),
+                ),
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.calendar),
+                  label: Text('Selectors'),
+                ),
+              ],
+            );
+          },
+          bottom: const MacosListTile(
             leading: MacosIcon(CupertinoIcons.profile_circled),
             title: Text('Tim Apple'),
             subtitle: Text('tim@apple.com'),
           ),
         ),
-        builder: (context, controller) {
-          return SidebarItems(
-            currentIndex: pageIndex,
-            onChanged: (i) => setState(() => pageIndex = i),
-            scrollController: controller,
-            items: const [
-              SidebarItem(
-                leading: MacosIcon(CupertinoIcons.square_on_circle),
-                label: Text('Buttons'),
-              ),
-              SidebarItem(
-                leading: MacosIcon(CupertinoIcons.arrow_2_circlepath),
-                label: Text('Indicators'),
-              ),
-              SidebarItem(
-                leading: MacosIcon(CupertinoIcons.textbox),
-                label: Text('Fields'),
-              ),
-              SidebarItem(
-                label: Text('Disclosure'),
-                disclosureItems: [
-                  SidebarItem(
-                    leading: MacosIcon(CupertinoIcons.infinite),
-                    label: Text('Colors'),
-                  ),
-                  SidebarItem(
-                    leading: MacosIcon(CupertinoIcons.infinite),
-                    label: Text('Item 3'),
-                  ),
-                ],
-              ),
-              SidebarItem(
-                leading: MacosIcon(CupertinoIcons.rectangle),
-                label: Text('Dialogs & Sheets'),
-              ),
-            ],
-          );
-        },
+        child: IndexedStack(
+          index: pageIndex,
+          children: pages,
+        ),
       ),
     );
   }
