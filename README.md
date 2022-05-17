@@ -4,6 +4,8 @@ Flutter widgets and themes implementing the current macOS design language.
 
 Check out our **interactive widget gallery** online at https://groovinchip.github.io/macos_ui/#/
 
+Guides, codelabs, and other documentation can be found at https://macosui.dev
+
 [![pub package](https://img.shields.io/pub/v/macos_ui.svg)](https://pub.dev/packages/macos_ui)
 [![pub package](https://img.shields.io/pub/publisher/macos_ui.svg)](https://pub.dev/packages/macos_ui)  
 
@@ -187,8 +189,9 @@ class BlurryContainerViewController: NSViewController {
   }
 }
 
-class MainFlutterWindow: NSWindow {
+class MainFlutterWindow: NSWindow, NSWindowDelegate {
   override func awakeFromNib() {
+    delegate = self
     let blurryContainerViewController = BlurryContainerViewController()
     let windowFrame = self.frame
     self.contentViewController = blurryContainerViewController
@@ -218,8 +221,15 @@ class MainFlutterWindow: NSWindow {
   }
 
   func window(_ window: NSWindow, willUseFullScreenPresentationOptions proposedOptions: NSApplication.PresentationOptions = []) -> NSApplication.PresentationOptions {
-    // Hides the toolbar when in fullscreen mode
     return [.autoHideToolbar, .autoHideMenuBar, .fullScreen]
+  }
+
+  func windowWillEnterFullScreen(_ notification: Notification) {
+      self.toolbar?.isVisible = false
+  }
+  
+  func windowDidExitFullScreen(_ notification: Notification) {
+      self.toolbar?.isVisible = true
   }
 }
 

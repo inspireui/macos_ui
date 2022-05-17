@@ -1,3 +1,9 @@
+## [1.4.1+1]
+* Update `pubspec.yaml` with `repository` and new `homepage` field.
+
+## [1.4.1]
+* Fixes an issue where if the app was displayed in full screen mode, an opaque empty toolbar would appear at the top [#249](https://github.com/GroovinChip/macos_ui/issues/249) 
+  
 ## [1.4.0]
 * Migration to Flutter 3.0
   * Minimum dart sdk version is now 2.17.0
