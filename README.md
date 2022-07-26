@@ -16,6 +16,15 @@ Guides, codelabs, and other documentation can be found at https://macosui.dev
 
 <img src="https://imgur.com/5mFQKBU.png" width="75%"/>
 
+## 🚨 Usage notes  
+pub.dev shows that `macos_ui` only supports macOS. This is because `macos_ui` calls some native code, and therefore 
+specifies macOS as a plugin platform in the `pubspec.yaml` file. `macos_ui` _will_ work on any platform that
+Flutter supports, **but you will get best results on macOS**.
+
+The features of `macos_ui` that will _not_ work on platforms other than macOS due to calling native code are:
+* The `MacosColors.controlAccentColor()` function
+* The `MacosColorWell` widget
+
 ## Contents
 
 <details>
@@ -35,6 +44,7 @@ Guides, codelabs, and other documentation can be found at https://macosui.dev
   - [Modern Window Look](#modern-window-look)
   - [ToolBar](#toolbar)
   - [MacosListTile](#MacosListTile)
+  - [MacosTabView](#MacosTabView)
 </details>
 
 <details>
@@ -55,6 +65,7 @@ Guides, codelabs, and other documentation can be found at https://macosui.dev
   - [PopupButton](#popupbutton)
   - [PushButton](#pushbutton)
   - [MacosSwitch](#macosswitch)
+  - [MacosSegmentedControl](#macossegmentedcontrol)
 </details>
   
 <details>
@@ -94,6 +105,7 @@ Guides, codelabs, and other documentation can be found at https://macosui.dev
 - [Selectors](#selectors)
   - [MacosDatePicker](#macosdatepicker)
   - [MacosTimePicker](#macostimepicker)
+  - [MacosColorWell](#macoscolorwell)
 </details>
 
 ---
@@ -354,7 +366,49 @@ MacosListTile(
 ),
 ```
 
+## MacosTabView
+A multipage interface that displays one page at a time. Must be used in a `StatefulWidget`.
 
+<img src="https://imgur.com/Mdn7Li2.png"/>
+
+You can control the placement of the tabs using the `position` property.
+
+Usage:
+```dart
+final _controller = MacosTabController(
+  initialIndex: 0,
+  length: 3,
+);
+
+...
+
+MacosTabView(
+  controller: _controller,
+  tabs: const [
+    MacosTab(
+      label: 'Tab 1',
+    ),
+    MacosTab(
+      label: 'Tab 2',
+    ),
+    MacosTab(
+      label: 'Tab 3',
+    ),
+  ],
+  children: const [
+    Center(
+      child: Text('Tab 1'),
+    ),
+    Center(
+      child: Text('Tab 2'),
+    ),
+    Center(
+      child: Text('Tab 3'),
+    ),
+  ],
+),        
+
+```
 
 # Icons
 
@@ -583,6 +637,16 @@ MacosSwitch(
   },
 ),
 ```
+
+## MacosSegmentedControl
+
+Displays one or more navigational tabs in a single horizontal group. Used by `MacosTabView` to navigate between the 
+different tabs of the tab bar.
+
+<img src="https://imgur.com/Igvms1w.jpg"/>
+
+The typical usage of this widget is by `MacosTabView`, to control the navigation of its children. You do not need to 
+specify a `MacosSegmentedControl` with your `MacosTabView`, as it is built by that widget.
 
 # Dialogs and Sheets
 
@@ -840,6 +904,13 @@ There are three styles of `MacosDatePickers`:
   calendar-like interface to select a date.
 * `combined`: provides both `textual` and `graphical` interfaces.
 
+Example usage:
+```dart
+MacosDatePicker(
+  onDateChanged: (date) => debugPrint('$date'),
+),
+```
+
 ## MacosTimePicker
 
 <img src="https://imgur.com/RtPbRo2.png" width="50%"/>
@@ -853,3 +924,27 @@ There are three styles of `MacosTimePickers`:
 * `graphical`: a visual time picker where the user can move the hands of a
   clock-like interface to select a time.
 * `combined`: provides both `textual` and `graphical` interfaces.
+
+Example usage:
+```dart
+MacosTimePicker(
+  onTimeChanged: (time) => debugPrint('$time'),
+),
+```
+
+## MacosColorWell
+
+<img src="https://imgur.com/VpK4IlM.gif" width="50%"/>
+
+Lets the user choose a color via the native macOS color picker.
+
+You can choose which mode to launch the picker in using the `ColorPickerMode` enum. The default is `ColorPickerMode.wheel`
+
+🚨 This widget will not work on platforms other than macOS!
+
+Example usage: 
+```dart
+MacosColorWell(
+  onColorSelected: (color) => debugPrint('$color'),
+),
+```

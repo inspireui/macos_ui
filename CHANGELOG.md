@@ -1,3 +1,31 @@
+## [1.7.0]
+* ✨ New
+  * `MacosImageIcon` widget. Identical to the `ImageIcon` from `flutter/widgets.dart` except it will obey a 
+`MacosIconThemeData` instead of an `IconThemeData`
+  * `SidebarItemSize` enum, which determines the height of sidebar items and the maximum size their `leading` widgets.
+  * `SidebarItem` now accepts an optional `trailing` widget.
+* 🔄 Updated
+  * `SidebarItems` now supports `SidebarItemSize` via the `itemSize` property, which defaults to 
+`SidebarItemSize.medium`. The widget has been updated to manage the item's height, the maximum size of the item's 
+leading widget, and the font size of the item's label widget according to the given `SidebarItemSize`.
+  * The example app has been tweaked to use some icons from the SF Symbols 4 Beta via the new `MacosImageIcon` widget.
+
+## [1.6.0]
+* New widgets: `MacosTabView` and `MacosTabView`
+* BREAKING CHANGE: `Label.yAxis` has been renamed to `Label.crossAxisAlignment`
+* BREAKING CHANGE: `TooltipTheme` and `TooltipThemeData` have been renamed to `MacosTooltipTheme` and 
+`MacosTooltipThemeData`
+
+## [1.5.1]
+* Correct the placement of the leading widget in disclosure sidebar items [#268](https://github.com/GroovinChip/macos_ui/issues/268)
+* Improve the sizing of the disclosure item indicator
+
+## [1.5.0]
+* Adds `endSidebar` to `MacosWindow`
+
+## [1.4.2]
+* Fixes RenderFlex overflowed in `MacosListTile` [#264](https://github.com/GroovinChip/macos_ui/issues/264)
+
 ## [1.4.1+1]
 * Update `pubspec.yaml` with `repository` and new `homepage` field.
 
