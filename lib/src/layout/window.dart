@@ -217,9 +217,6 @@ class _MacosWindowState extends State<MacosWindow> {
                     children: [
                       if ((widget.sidebar?.topOffset ?? 0) > 0)
                         SizedBox(height: widget.sidebar?.topOffset),
-                      if (_sidebarScrollController.hasClients &&
-                          _sidebarScrollController.offset > 0.0)
-                        Divider(thickness: 1, height: 1, color: dividerColor),
                       if (widget.sidebar!.top != null)
                         widget.sidebar!.top!,
                       Expanded(
