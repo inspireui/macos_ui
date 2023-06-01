@@ -61,7 +61,7 @@ class _MacosWindowState extends State<MacosWindow> {
   double _endSidebarDragStartWidth = 0.0;
   double _endSidebarDragStartPosition = 0.0;
   bool _showSidebar = true;
-  late bool _showEndSidebar = widget.endSidebar?.shownByDefault ?? false;
+  bool _showEndSidebar = false;
   int _sidebarSlideDuration = 0;
   SystemMouseCursor _sidebarCursor = SystemMouseCursors.resizeColumn;
   SystemMouseCursor _endSidebarCursor = SystemMouseCursors.resizeLeft;
@@ -80,6 +80,7 @@ class _MacosWindowState extends State<MacosWindow> {
     if (widget.endSidebar?.builder != null) {
       _endSidebarScrollController.addListener(() => setState(() {}));
     }
+    _showEndSidebar = widget.endSidebar?.shownByDefault ?? _showEndSidebar;
   }
 
   @override
@@ -93,27 +94,33 @@ class _MacosWindowState extends State<MacosWindow> {
   void didUpdateWidget(covariant MacosWindow old) {
     super.didUpdateWidget(old);
     setState(() {
-      if (widget.sidebar == null) {
+      final sidebar = widget.sidebar;
+      if (sidebar == null) {
         _sidebarWidth = 0.0;
-      } else if (widget.sidebar!.minWidth != old.sidebar!.minWidth ||
-          widget.sidebar!.maxWidth != old.sidebar!.maxWidth) {
-        if (widget.sidebar!.minWidth > _sidebarWidth) {
-          _sidebarWidth = widget.sidebar!.minWidth;
+      } else if (sidebar.minWidth != old.sidebar?.minWidth ||
+          sidebar.maxWidth != old.sidebar?.maxWidth) {
+        if (sidebar.minWidth > _sidebarWidth) {
+          _sidebarWidth = sidebar.minWidth;
         }
-        if (widget.sidebar!.maxWidth! < _sidebarWidth) {
-          _sidebarWidth = widget.sidebar!.maxWidth!;
+        final maxWidth = sidebar.maxWidth;
+        if (maxWidth != null && maxWidth < _sidebarWidth) {
+          _sidebarWidth = maxWidth;
         }
       }
-      if (widget.endSidebar == null) {
+      final endSidebar = widget.endSidebar;
+      if (endSidebar == null) {
         _endSidebarWidth = 0.0;
-      } else if (widget.endSidebar!.minWidth != old.endSidebar!.minWidth ||
-          widget.endSidebar!.maxWidth != old.endSidebar!.maxWidth) {
-        if (widget.endSidebar!.minWidth > _endSidebarWidth) {
-          _endSidebarWidth = widget.endSidebar!.minWidth;
+        _showEndSidebar = false;
+      } else if (endSidebar.minWidth != old.endSidebar?.minWidth ||
+          endSidebar.maxWidth != old.endSidebar?.maxWidth) {
+        if (endSidebar.minWidth > _endSidebarWidth) {
+          _endSidebarWidth = endSidebar.minWidth;
         }
-        if (widget.endSidebar!.maxWidth! < _endSidebarWidth) {
-          _endSidebarWidth = widget.endSidebar!.maxWidth!;
+        final maxWidth = endSidebar.maxWidth;
+        if (maxWidth != null && maxWidth < _endSidebarWidth) {
+          _endSidebarWidth = maxWidth;
         }
+        _showEndSidebar = true;
       }
     });
   }
@@ -217,8 +224,7 @@ class _MacosWindowState extends State<MacosWindow> {
                     children: [
                       if ((widget.sidebar?.topOffset ?? 0) > 0)
                         SizedBox(height: widget.sidebar?.topOffset),
-                      if (widget.sidebar!.top != null)
-                        widget.sidebar!.top!,
+                      if (widget.sidebar!.top != null) widget.sidebar!.top!,
                       Expanded(
                         child: MacosScrollbar(
                           controller: _sidebarScrollController,
