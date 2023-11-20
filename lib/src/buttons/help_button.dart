@@ -114,12 +114,6 @@ class HelpButtonState extends State<HelpButton>
     _opacityTween.end = widget.pressedOpacity ?? 1.0;
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
   @visibleForTesting
   bool buttonHeldDown = false;
 
@@ -153,6 +147,12 @@ class HelpButtonState extends State<HelpButton>
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != buttonHeldDown) _animate();
     });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -190,6 +190,8 @@ class HelpButtonState extends State<HelpButton>
             constraints: const BoxConstraints(
               minWidth: 20,
               minHeight: 20,
+              maxWidth: 20,
+              maxHeight: 20,
             ),
             child: FadeTransition(
               opacity: _opacityAnimation,
@@ -212,16 +214,14 @@ class HelpButtonState extends State<HelpButton>
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Align(
-                    alignment: widget.alignment,
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: Icon(
-                      CupertinoIcons.question,
-                      color: foregroundColor,
-                    ),
+                child: Align(
+                  alignment: widget.alignment,
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: Icon(
+                    CupertinoIcons.question,
+                    color: foregroundColor,
+                    size: 13,
                   ),
                 ),
               ),

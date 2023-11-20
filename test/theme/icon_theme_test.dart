@@ -51,7 +51,7 @@ void main() {
     expect(
       description,
       [
-        'color: Color(0xffffffff)',
+        'MacosColor: MacosColor(0xffffffff)',
         'opacity: 0.0',
         'size: 20.0',
       ],
@@ -63,10 +63,11 @@ void main() {
     await tester.pumpWidget(
       MacosApp(
         home: MacosWindow(
+          disableWallpaperTinting: true,
           child: MacosScaffold(
             children: [
               ContentArea(
-                builder: (context, scrollController) {
+                builder: (context, _) {
                   capturedContext = context;
                   return const MacosIcon(
                     CupertinoIcons.add,

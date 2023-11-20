@@ -25,9 +25,9 @@ void main() {
             child: MacosScaffold(
               children: [
                 ContentArea(
-                  builder: (context, scrollController) {
+                  builder: (context, _) {
                     return PushButton(
-                      buttonSize: ButtonSize.small,
+                      controlSize: ControlSize.regular,
                       onPressed: mockOnPressedFunction.handler,
                       child: const Text('Push me'),
                     );
@@ -55,12 +55,13 @@ void main() {
             pushButtonTheme: darkPushButtonThemeData,
           ),
           home: MacosWindow(
+            disableWallpaperTinting: true,
             child: MacosScaffold(
               children: [
                 ContentArea(
-                  builder: (context, scrollController) {
+                  builder: (context, _) {
                     return PushButton(
-                      buttonSize: ButtonSize.small,
+                      controlSize: ControlSize.regular,
                       key: pushButtonKey,
                       onPressed: mockOnTapCancelFunction.handler,
                       child: const Text('Push me'),
@@ -83,7 +84,7 @@ void main() {
     testWidgets('debugFillProperties', (tester) async {
       final builder = DiagnosticPropertiesBuilder();
       const PushButton(
-        buttonSize: ButtonSize.small,
+        controlSize: ControlSize.regular,
         child: Text('Test'),
       ).debugFillProperties(builder);
 
@@ -95,15 +96,14 @@ void main() {
       expect(
         description,
         [
-          'buttonSize: small',
+          'controlSize: regular',
           'color: null',
           'disabledColor: null',
-          'pressedOpacity: 0.4',
           'alignment: Alignment.center',
           'semanticLabel: null',
           'borderRadius: BorderRadius.circular(4.0)',
           'disabled',
-          'isSecondary: null',
+          'secondary: null',
         ],
       );
     });

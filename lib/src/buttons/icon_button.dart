@@ -161,12 +161,6 @@ class MacosIconButtonState extends State<MacosIconButton>
     _opacityTween.end = widget.pressedOpacity ?? 1.0;
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
   @visibleForTesting
   bool buttonHeldDown = false;
 
@@ -200,6 +194,12 @@ class MacosIconButtonState extends State<MacosIconButton>
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != buttonHeldDown) _animate();
     });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -253,7 +253,7 @@ class MacosIconButtonState extends State<MacosIconButton>
                   borderRadius: widget.borderRadius != null
                       ? widget.borderRadius
                       : widget.shape == BoxShape.rectangle
-                          ? BorderRadius.circular(7.0)
+                          ? const BorderRadius.all(Radius.circular(7))
                           : null,
                   color: !enabled
                       ? disabledColor

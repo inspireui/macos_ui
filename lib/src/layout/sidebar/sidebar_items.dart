@@ -115,8 +115,8 @@ class SidebarItems extends StatelessWidget {
     assert(debugCheckHasMacosTheme(context));
     assert(currentIndex < _allItems.length);
     final theme = MacosTheme.of(context);
-    return IconTheme.merge(
-      data: const IconThemeData(size: 20),
+    return MacosIconTheme.merge(
+      data: const MacosIconThemeData(size: 20),
       child: _SidebarItemsConfiguration(
         selectedColor: selectedColor ?? theme.primaryColor,
         unselectedColor: unselectedColor ?? MacosColors.transparent,
@@ -206,9 +206,7 @@ class _SidebarItem extends StatelessWidget {
   /// Typically a [Navigator] call
   final VoidCallback? onClick;
 
-  void _handleActionTap() async {
-    onClick?.call();
-  }
+  void _handleActionTap() => onClick?.call();
 
   Map<Type, Action<Intent>> get _actionMap => <Type, Action<Intent>>{
         ActivateIntent: CallbackAction<ActivateIntent>(
@@ -286,9 +284,8 @@ class _SidebarItem extends StatelessWidget {
                     padding: EdgeInsets.only(right: spacing),
                     child: MacosIconTheme.merge(
                       data: MacosIconThemeData(
-                        color: selected
-                            ? MacosColors.white
-                            : MacosColors.controlAccentColor,
+                        color:
+                            selected ? MacosColors.white : theme.primaryColor,
                         size: itemSize.iconSize,
                       ),
                       child: item.leading!,
@@ -362,12 +359,6 @@ class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
     _controller = AnimationController(duration: _kExpand, vsync: this);
     _heightFactor = _controller.drive(_easeInTween);
     _iconTurns = _controller.drive(_halfTween.chain(_easeInTween));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   void _handleTap() {
@@ -459,6 +450,12 @@ class __DisclosureSidebarItemState extends State<_DisclosureSidebarItem>
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'package:example/widgets/widget_text_title1.dart';
+import 'package:example/widgets/widget_text_title2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
@@ -16,6 +18,7 @@ class _ButtonsPageState extends State<ButtonsPage> {
   String popupValue = 'One';
   String languagePopupValue = 'English';
   bool switchValue = false;
+  bool isDisclosureButtonPressed = false;
   final _tabController = MacosTabController(initialIndex: 0, length: 3);
 
   @override
@@ -58,27 +61,388 @@ class _ButtonsPageState extends State<ButtonsPage> {
         ],
       ),
       children: [
-        ResizablePane(
-          minWidth: 180,
-          startWidth: 200,
-          windowBreakpoint: 700,
-          resizableSide: ResizableSide.right,
-          builder: (_, __) {
-            return const Center(
-              child: Text('Resizable Pane'),
-            );
-          },
-        ),
         ContentArea(
           builder: (context, scrollController) {
             return SingleChildScrollView(
+              controller: scrollController,
               padding: const EdgeInsets.all(20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('MacosBackButton'),
+                  const WidgetTextTitle1(widgetName: 'PushButton'),
+                  Divider(color: MacosTheme.of(context).dividerColor),
+                  Text(
+                    'Primary',
+                    style: MacosTypography.of(context).title2,
+                  ),
+                  Row(
+                    children: [
+                      PushButton(
+                        controlSize: ControlSize.mini,
+                        child: const Text('Mini'),
+                        onPressed: () {
+                          MacosWindowScope.of(context).toggleSidebar();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.small,
+                        child: const Text('Small'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return MacosScaffold(
+                                  toolBar: const ToolBar(
+                                    title: Text('New page'),
+                                  ),
+                                  children: [
+                                    ContentArea(
+                                      builder: (context, _) {
+                                        return Center(
+                                          child: PushButton(
+                                            controlSize: ControlSize.regular,
+                                            child: const Text('Go Back'),
+                                            onPressed: () {
+                                              Navigator.of(context).maybePop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ResizablePane(
+                                      minSize: 180,
+                                      startSize: 200,
+                                      windowBreakpoint: 700,
+                                      resizableSide: ResizableSide.left,
+                                      builder: (_, __) {
+                                        return const Center(
+                                          child: Text('Resizable Pane'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.regular,
+                        child: const Text('Regular'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return MacosScaffold(
+                                  toolBar: const ToolBar(
+                                    title: Text('New page'),
+                                  ),
+                                  children: [
+                                    ContentArea(
+                                      builder: (context, _) {
+                                        return Center(
+                                          child: PushButton(
+                                            controlSize: ControlSize.regular,
+                                            child: const Text('Go Back'),
+                                            onPressed: () {
+                                              Navigator.of(context).maybePop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ResizablePane(
+                                      minSize: 180,
+                                      startSize: 200,
+                                      windowBreakpoint: 700,
+                                      resizableSide: ResizableSide.left,
+                                      builder: (_, __) {
+                                        return const Center(
+                                          child: Text('Resizable Pane'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.large,
+                        child: const Text('Large'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return MacosScaffold(
+                                  toolBar: const ToolBar(
+                                    title: Text('New page'),
+                                  ),
+                                  children: [
+                                    ContentArea(
+                                      builder: (context, _) {
+                                        return Center(
+                                          child: PushButton(
+                                            controlSize: ControlSize.regular,
+                                            child: const Text('Go Back'),
+                                            onPressed: () {
+                                              Navigator.of(context).maybePop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ResizablePane(
+                                      minSize: 180,
+                                      startSize: 200,
+                                      windowBreakpoint: 700,
+                                      resizableSide: ResizableSide.left,
+                                      builder: (_, __) {
+                                        return const Center(
+                                          child: Text('Resizable Pane'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Disabled Primary',
+                    style: MacosTypography.of(context).title2,
+                  ),
+                  const Row(
+                    children: [
+                      PushButton(
+                        controlSize: ControlSize.mini,
+                        child: Text('Mini'),
+                      ),
+                      SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.small,
+                        child: Text('Small'),
+                      ),
+                      SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.regular,
+                        child: Text('Regular'),
+                      ),
+                      SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.large,
+                        child: Text('Large'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Secondary',
+                    style: MacosTypography.of(context).title2,
+                  ),
+                  Row(
+                    children: [
+                      PushButton(
+                        controlSize: ControlSize.mini,
+                        secondary: true,
+                        child: const Text('Mini'),
+                        onPressed: () {
+                          MacosWindowScope.of(context).toggleSidebar();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.small,
+                        secondary: true,
+                        child: const Text('Small'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return MacosScaffold(
+                                  toolBar: const ToolBar(
+                                    title: Text('New page'),
+                                  ),
+                                  children: [
+                                    ContentArea(
+                                      builder: (context, _) {
+                                        return Center(
+                                          child: PushButton(
+                                            controlSize: ControlSize.regular,
+                                            child: const Text('Go Back'),
+                                            onPressed: () {
+                                              Navigator.of(context).maybePop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ResizablePane(
+                                      minSize: 180,
+                                      startSize: 200,
+                                      windowBreakpoint: 700,
+                                      resizableSide: ResizableSide.left,
+                                      builder: (_, __) {
+                                        return const Center(
+                                          child: Text('Resizable Pane'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.regular,
+                        secondary: true,
+                        child: const Text('Regular'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return MacosScaffold(
+                                  toolBar: const ToolBar(
+                                    title: Text('New page'),
+                                  ),
+                                  children: [
+                                    ContentArea(
+                                      builder: (context, _) {
+                                        return Center(
+                                          child: PushButton(
+                                            controlSize: ControlSize.regular,
+                                            child: const Text('Go Back'),
+                                            onPressed: () {
+                                              Navigator.of(context).maybePop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ResizablePane(
+                                      minSize: 180,
+                                      startSize: 200,
+                                      windowBreakpoint: 700,
+                                      resizableSide: ResizableSide.left,
+                                      builder: (_, __) {
+                                        return const Center(
+                                          child: Text('Resizable Pane'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.large,
+                        secondary: true,
+                        child: const Text('Large'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return MacosScaffold(
+                                  toolBar: const ToolBar(
+                                    title: Text('New page'),
+                                  ),
+                                  children: [
+                                    ContentArea(
+                                      builder: (context, _) {
+                                        return Center(
+                                          child: PushButton(
+                                            controlSize: ControlSize.regular,
+                                            child: const Text('Go Back'),
+                                            onPressed: () {
+                                              Navigator.of(context).maybePop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ResizablePane(
+                                      minSize: 180,
+                                      startSize: 200,
+                                      windowBreakpoint: 700,
+                                      resizableSide: ResizableSide.left,
+                                      builder: (_, __) {
+                                        return const Center(
+                                          child: Text('Resizable Pane'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Disabled Secondary',
+                    style: MacosTypography.of(context).title2,
+                  ),
+                  const Row(
+                    children: [
+                      PushButton(
+                        controlSize: ControlSize.mini,
+                        secondary: true,
+                        child: Text('Mini'),
+                      ),
+                      SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.small,
+                        secondary: true,
+                        child: Text('Small'),
+                      ),
+                      SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.regular,
+                        secondary: true,
+                        child: Text('Regular'),
+                      ),
+                      SizedBox(width: 8),
+                      PushButton(
+                        controlSize: ControlSize.large,
+                        secondary: true,
+                        child: Text('Large'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const WidgetTextTitle1(widgetName: 'HelpButton'),
+                  Divider(color: MacosTheme.of(context).dividerColor),
+                  HelpButton(onPressed: () {}),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Icon Buttons',
+                    style: MacosTypography.of(context).title1,
+                  ),
+                  Divider(color: MacosTheme.of(context).dividerColor),
+                  const WidgetTextTitle2(widgetName: 'MacosBackButton'),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       MacosBackButton(
                         onPressed: () => debugPrint('click'),
@@ -91,10 +455,26 @@ class _ButtonsPageState extends State<ButtonsPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Text('MacosIconButton'),
+                  const WidgetTextTitle2(widgetName: 'MacosDisclosureButton'),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      MacosDisclosureButton(
+                        isPressed: isDisclosureButtonPressed,
+                        onPressed: () {
+                          debugPrint('click');
+                          setState(() {
+                            isDisclosureButtonPressed =
+                                !isDisclosureButtonPressed;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const WidgetTextTitle2(widgetName: 'MacosIconButton'),
+                  const SizedBox(height: 8),
+                  Row(
                     children: [
                       MacosIconButton(
                         icon: const MacosIcon(
@@ -123,173 +503,204 @@ class _ButtonsPageState extends State<ButtonsPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Text('PushButton'),
+                  Text(
+                    'Switches, Checkboxes, & Radios',
+                    style: MacosTypography.of(context).title1,
+                  ),
+                  Divider(color: MacosTheme.of(context).dividerColor),
+                  const WidgetTextTitle2(widgetName: 'MacosSwitch'),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      PushButton(
-                        buttonSize: ButtonSize.large,
-                        child: const Text('Large'),
-                        onPressed: () {
-                          MacosWindowScope.of(context).toggleSidebar();
-                        },
+                      Row(
+                        children: [
+                          const Text('Mini'),
+                          const SizedBox(width: 8),
+                          MacosSwitch(
+                            value: switchValue,
+                            size: ControlSize.mini,
+                            onChanged: (value) {
+                              setState(() => switchValue = value);
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 20),
-                      PushButton(
-                        buttonSize: ButtonSize.small,
-                        child: const Text('Small'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) {
-                                return MacosScaffold(
-                                  toolBar: const ToolBar(
-                                    title: Text("New page"),
-                                  ),
-                                  children: [
-                                    ContentArea(
-                                      builder: (context, scrollController) {
-                                        return Center(
-                                          child: PushButton(
-                                            buttonSize: ButtonSize.large,
-                                            child: const Text('Go Back'),
-                                            onPressed: () {
-                                              Navigator.maybePop(context);
-                                            },
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    ResizablePane(
-                                      minWidth: 180,
-                                      startWidth: 200,
-                                      windowBreakpoint: 700,
-                                      resizableSide: ResizableSide.left,
-                                      builder: (_, __) {
-                                        return const Center(
-                                          child: Text('Resizable Pane'),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          );
-                        },
+                      const SizedBox(height: 8.0),
+                      Row(
+                        children: [
+                          const Text('Small'),
+                          const SizedBox(width: 8),
+                          MacosSwitch(
+                            value: switchValue,
+                            size: ControlSize.small,
+                            onChanged: (value) {
+                              setState(() => switchValue = value);
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 20),
-                      PushButton(
-                        buttonSize: ButtonSize.large,
-                        isSecondary: true,
-                        child: const Text('Secondary'),
-                        onPressed: () {
-                          MacosWindowScope.of(context).toggleSidebar();
-                        },
+                      const SizedBox(height: 8.0),
+                      Row(
+                        children: [
+                          const Text('Regular'),
+                          const SizedBox(width: 8),
+                          MacosSwitch(
+                            value: switchValue,
+                            onChanged: (value) {
+                              setState(() => switchValue = value);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  const Text('MacosSwitch'),
+                  const SizedBox(height: 16),
+                  const WidgetTextTitle2(widgetName: 'MacosCheckbox'),
                   const SizedBox(height: 8),
-                  MacosSwitch(
+                  MacosCheckbox(
                     value: switchValue,
                     onChanged: (value) {
                       setState(() => switchValue = value);
                     },
                   ),
-                  const SizedBox(height: 20),
-                  const Text('MacosPulldownButton'),
+                  const SizedBox(height: 16),
+                  const WidgetTextTitle2(widgetName: 'MacosRadioButton'),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('System Theme'),
+                      const SizedBox(width: 8),
+                      MacosRadioButton<ThemeMode>(
+                        groupValue: context.watch<AppTheme>().mode,
+                        value: ThemeMode.system,
+                        onChanged: (value) {
+                          context.read<AppTheme>().mode = value!;
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Text('Light Theme'),
+                      const SizedBox(width: 24),
+                      MacosRadioButton<ThemeMode>(
+                        groupValue: context.watch<AppTheme>().mode,
+                        value: ThemeMode.light,
+                        onChanged: (value) {
+                          context.read<AppTheme>().mode = value!;
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Text('Dark Theme'),
+                      const SizedBox(width: 26),
+                      MacosRadioButton<ThemeMode>(
+                        groupValue: context.watch<AppTheme>().mode,
+                        value: ThemeMode.dark,
+                        onChanged: (value) {
+                          context.read<AppTheme>().mode = value!;
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Pulldown & Popup Buttons',
+                    style: MacosTypography.of(context).title1,
+                  ),
+                  Divider(color: MacosTheme.of(context).dividerColor),
+                  const WidgetTextTitle2(widgetName: 'MacosPulldownButton'),
+                  const SizedBox(height: 8),
+                  Row(
                     children: [
                       MacosPulldownButton(
-                        title: "PDF",
+                        title: 'PDF',
                         items: [
                           MacosPulldownMenuItem(
                             title: const Text('Open in Preview'),
-                            onTap: () => debugPrint("Opening in preview..."),
+                            onTap: () => debugPrint('Opening in preview...'),
                           ),
                           MacosPulldownMenuItem(
                             title: const Text('Save as PDF...'),
-                            onTap: () => debugPrint("Saving as PDF..."),
+                            onTap: () => debugPrint('Saving as PDF...'),
                           ),
                           MacosPulldownMenuItem(
                             enabled: false,
                             title: const Text('Save as Postscript'),
-                            onTap: () => debugPrint("Saving as Postscript..."),
+                            onTap: () => debugPrint('Saving as Postscript...'),
                           ),
                           const MacosPulldownMenuDivider(),
                           MacosPulldownMenuItem(
                             enabled: false,
                             title: const Text('Save to iCloud Drive'),
-                            onTap: () => debugPrint("Saving to iCloud..."),
+                            onTap: () => debugPrint('Saving to iCloud...'),
                           ),
                           MacosPulldownMenuItem(
                             enabled: false,
                             title: const Text('Save to Web Receipts'),
                             onTap: () =>
-                                debugPrint("Saving to Web Receipts..."),
+                                debugPrint('Saving to Web Receipts...'),
                           ),
                           MacosPulldownMenuItem(
                             title: const Text('Send in Mail...'),
-                            onTap: () => debugPrint("Sending via Mail..."),
+                            onTap: () => debugPrint('Sending via Mail...'),
                           ),
                           const MacosPulldownMenuDivider(),
                           MacosPulldownMenuItem(
                             title: const Text('Edit Menu...'),
-                            onTap: () => debugPrint("Editing menu..."),
+                            onTap: () => debugPrint('Editing menu...'),
                           ),
                         ],
                       ),
                       const SizedBox(width: 20),
                       const MacosPulldownButton(
-                        title: "PDF",
-                        disabledTitle: "Disabled",
+                        title: 'PDF',
+                        disabledTitle: 'Disabled',
                         items: [],
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       MacosPulldownButton(
                         icon: CupertinoIcons.ellipsis_circle,
                         items: [
                           MacosPulldownMenuItem(
                             title: const Text('New Folder'),
-                            onTap: () => debugPrint("Creating new folder..."),
+                            onTap: () => debugPrint('Creating new folder...'),
                           ),
                           MacosPulldownMenuItem(
                             title: const Text('Open'),
-                            onTap: () => debugPrint("Opening..."),
+                            onTap: () => debugPrint('Opening...'),
                           ),
                           MacosPulldownMenuItem(
                             title: const Text('Open with...'),
-                            onTap: () => debugPrint("Opening with..."),
+                            onTap: () => debugPrint('Opening with...'),
                           ),
                           MacosPulldownMenuItem(
                             title: const Text('Import from iPhone...'),
-                            onTap: () => debugPrint("Importing..."),
+                            onTap: () => debugPrint('Importing...'),
                           ),
                           const MacosPulldownMenuDivider(),
                           MacosPulldownMenuItem(
                             enabled: false,
                             title: const Text('Remove'),
-                            onTap: () => debugPrint("Deleting..."),
+                            onTap: () => debugPrint('Deleting...'),
                           ),
                           MacosPulldownMenuItem(
                             title: const Text('Move to Bin'),
-                            onTap: () => debugPrint("Moving to Bin..."),
+                            onTap: () => debugPrint('Moving to Bin...'),
                           ),
                           const MacosPulldownMenuDivider(),
                           MacosPulldownMenuItem(
                             title: const Text('Tags...'),
-                            onTap: () => debugPrint("Tags..."),
+                            onTap: () => debugPrint('Tags...'),
                           ),
                         ],
                       ),
@@ -301,10 +712,9 @@ class _ButtonsPageState extends State<ButtonsPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Text('MacosPopupButton'),
+                  const WidgetTextTitle2(widgetName: 'MacosPopupButton'),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       MacosPopupButton<String>(
                         value: popupValue,
@@ -321,7 +731,7 @@ class _ButtonsPageState extends State<ButtonsPage> {
                       ),
                       const SizedBox(width: 20),
                       MacosPopupButton<String>(
-                        disabledHint: const Text("Disabled"),
+                        disabledHint: const Text('Disabled'),
                         onChanged: null,
                         items: null,
                       ),
@@ -342,52 +752,8 @@ class _ButtonsPageState extends State<ButtonsPage> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('System Theme'),
-                      const SizedBox(width: 8),
-                      MacosRadioButton<ThemeMode>(
-                        groupValue: context.watch<AppTheme>().mode,
-                        value: ThemeMode.system,
-                        onChanged: (value) {
-                          context.read<AppTheme>().mode = value!;
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Light Theme'),
-                      const SizedBox(width: 24),
-                      MacosRadioButton<ThemeMode>(
-                        groupValue: context.watch<AppTheme>().mode,
-                        value: ThemeMode.light,
-                        onChanged: (value) {
-                          context.read<AppTheme>().mode = value!;
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Dark Theme'),
-                      const SizedBox(width: 26),
-                      MacosRadioButton<ThemeMode>(
-                        groupValue: context.watch<AppTheme>().mode,
-                        value: ThemeMode.dark,
-                        onChanged: (value) {
-                          context.read<AppTheme>().mode = value!;
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('MacosSegmentedControl'),
+                  const WidgetTextTitle1(widgetName: 'MacosSegmentedControl'),
+                  Divider(color: MacosTheme.of(context).dividerColor),
                   const SizedBox(height: 8),
                   MacosSegmentedControl(
                     controller: _tabController,
@@ -411,55 +777,44 @@ class _ButtonsPageState extends State<ButtonsPage> {
             );
           },
         ),
-        ResizablePane(
-          minWidth: 180,
-          startWidth: 200,
-          windowBreakpoint: 800,
-          resizableSide: ResizableSide.left,
-          builder: (_, __) {
-            return const Center(
-              child: Text('Resizable Pane'),
-            );
-          },
-        ),
       ],
     );
   }
 }
 
 const languages = [
-  "Mandarin Chinese",
-  "Spanish",
-  "English",
-  "Hindi/Urdu",
-  "Arabic",
-  "Bengali",
-  "Portuguese",
-  "Russian",
-  "Japanese",
-  "German",
-  "Thai",
-  "Greek",
-  "Nepali",
-  "Punjabi",
-  "Wu",
-  "French",
-  "Telugu",
-  "Vietnamese",
-  "Marathi",
-  "Korean",
-  "Tamil",
-  "Italian",
-  "Turkish",
-  "Cantonese/Yue",
-  "Urdu",
-  "Javanese",
-  "Egyptian Arabic",
-  "Gujarati",
-  "Iranian Persian",
-  "Indonesian",
-  "Polish",
-  "Ukrainian",
-  "Romanian",
-  "Dutch"
+  'Mandarin Chinese',
+  'Spanish',
+  'English',
+  'Hindi/Urdu',
+  'Arabic',
+  'Bengali',
+  'Portuguese',
+  'Russian',
+  'Japanese',
+  'German',
+  'Thai',
+  'Greek',
+  'Nepali',
+  'Punjabi',
+  'Wu',
+  'French',
+  'Telugu',
+  'Vietnamese',
+  'Marathi',
+  'Korean',
+  'Tamil',
+  'Italian',
+  'Turkish',
+  'Cantonese/Yue',
+  'Urdu',
+  'Javanese',
+  'Egyptian Arabic',
+  'Gujarati',
+  'Iranian Persian',
+  'Indonesian',
+  'Polish',
+  'Ukrainian',
+  'Romanian',
+  'Dutch'
 ];

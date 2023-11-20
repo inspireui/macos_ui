@@ -6,16 +6,56 @@ import 'package:macos_ui/macos_ui.dart';
 void main() {
   group('MacosDatePicker tests', () {
     testWidgets(
-      'Textual MacosDatePicker renders the expected date',
+      'Textual MacosDatePicker renders the expected initial date',
+      (tester) async {
+        final initialDate = DateTime.now().add(const Duration(days: 30));
+        await tester.pumpWidget(
+          MacosApp(
+            home: MacosWindow(
+              disableWallpaperTinting: true,
+              child: MacosScaffold(
+                children: [
+                  ContentArea(
+                    builder: (context, _) {
+                      return Center(
+                        child: MacosDatePicker(
+                          onDateChanged: (date) {},
+                          initialDate: initialDate,
+                          style: DatePickerStyle.textual,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('/'), findsNWidgets(2));
+        expect(find.text('${initialDate.year}'), findsOneWidget);
+        if (initialDate.month == initialDate.day) {
+          expect(find.text('${initialDate.day}'), findsNWidgets(2));
+          expect(find.text('${initialDate.month}'), findsNWidgets(2));
+        } else {
+          expect(find.text('${initialDate.day}'), findsOneWidget);
+          expect(find.text('${initialDate.month}'), findsOneWidget);
+        }
+      },
+    );
+
+    testWidgets(
+      "Textual MacosDatePicker renders the today's date by default",
       (tester) async {
         final today = DateTime.now();
         await tester.pumpWidget(
           MacosApp(
             home: MacosWindow(
+              disableWallpaperTinting: true,
               child: MacosScaffold(
                 children: [
                   ContentArea(
-                    builder: (context, scrollController) {
+                    builder: (context, _) {
                       return Center(
                         child: MacosDatePicker(
                           onDateChanged: (date) {},
@@ -43,6 +83,61 @@ void main() {
     );
 
     testWidgets(
+      'Textual MacosDatePicker renders the date with respect to "dateFormat" property',
+      (tester) async {
+        renderWidget(String dateFormat) => MacosApp(
+              home: MacosWindow(
+                disableWallpaperTinting: true,
+                child: MacosScaffold(
+                  children: [
+                    ContentArea(
+                      builder: (context, _) {
+                        return Center(
+                          child: MacosDatePicker(
+                            initialDate: DateTime.parse('2023-04-01'),
+                            onDateChanged: (date) {},
+                            dateFormat: dateFormat,
+                            style: DatePickerStyle.textual,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+        getNthTextFromWidget(int index) =>
+            (find.byType(Text).at(index).evaluate().first.widget as Text).data
+                as String;
+
+        await tester.pumpWidget(renderWidget('dd.mm.yyyy'));
+        String firstDateElement = getNthTextFromWidget(0);
+        expect(firstDateElement, '01');
+        String secondDateElement = getNthTextFromWidget(1);
+        expect(secondDateElement, '.');
+        String thirdDateElement = getNthTextFromWidget(2);
+        expect(thirdDateElement, '04');
+        String fourthDateElement = getNthTextFromWidget(3);
+        expect(fourthDateElement, '.');
+        String fifthDateElement = getNthTextFromWidget(4);
+        expect(fifthDateElement, '2023');
+
+        await tester.pumpWidget(renderWidget('yyyy-m-d'));
+        firstDateElement = getNthTextFromWidget(0);
+        expect(firstDateElement, '2023');
+        secondDateElement = getNthTextFromWidget(1);
+        expect(secondDateElement, '-');
+        thirdDateElement = getNthTextFromWidget(2);
+        expect(thirdDateElement, '4');
+        fourthDateElement = getNthTextFromWidget(3);
+        expect(fourthDateElement, '-');
+        fifthDateElement = getNthTextFromWidget(4);
+        expect(fifthDateElement, '1');
+      },
+    );
+
+    testWidgets(
       'Can select the date field element and change the value',
       (tester) async {
         final today = DateTime.now();
@@ -52,7 +147,7 @@ void main() {
               child: MacosScaffold(
                 children: [
                   ContentArea(
-                    builder: (context, scrollController) {
+                    builder: (context, _) {
                       return Center(
                         child: MacosDatePicker(
                           onDateChanged: (date) {},
@@ -97,7 +192,7 @@ void main() {
               child: MacosScaffold(
                 children: [
                   ContentArea(
-                    builder: (context, scrollController) {
+                    builder: (context, _) {
                       return Center(
                         child: MacosDatePicker(
                           onDateChanged: (date) {},
@@ -142,7 +237,7 @@ void main() {
               child: MacosScaffold(
                 children: [
                   ContentArea(
-                    builder: (context, scrollController) {
+                    builder: (context, _) {
                       return Center(
                         child: MacosDatePicker(
                           onDateChanged: (date) {},
@@ -188,7 +283,7 @@ void main() {
               child: MacosScaffold(
                 children: [
                   ContentArea(
-                    builder: (context, scrollController) {
+                    builder: (context, _) {
                       return Center(
                         child: MacosDatePicker(
                           onDateChanged: (date) {
@@ -224,7 +319,7 @@ void main() {
               child: MacosScaffold(
                 children: [
                   ContentArea(
-                    builder: (context, scrollController) {
+                    builder: (context, _) {
                       return Center(
                         child: MacosDatePicker(
                           onDateChanged: (date) {
@@ -267,5 +362,159 @@ void main() {
         }
       },
     );
+
+    testWidgets(
+      'Graphical MacosDatePicker renders abbreviations based on "weekdayAbbreviations" and "monthAbbreviations" properties',
+      (tester) async {
+        await tester.pumpWidget(
+          MacosApp(
+            home: MacosWindow(
+              child: MacosScaffold(
+                children: [
+                  ContentArea(
+                    builder: (context, _) {
+                      return Center(
+                        child: MacosDatePicker(
+                          initialDate: DateTime.parse('2023-04-01'),
+                          onDateChanged: (date) {},
+                          weekdayAbbreviations: const [
+                            'Nd',
+                            'Po',
+                            'Wt',
+                            'Śr',
+                            'Cz',
+                            'Pt',
+                            'So',
+                          ],
+                          monthAbbreviations: const [
+                            'Sty',
+                            'Lut',
+                            'Mar',
+                            'Kwi',
+                            'Maj',
+                            'Cze',
+                            'Lip',
+                            'Sie',
+                            'Wrz',
+                            'Paź',
+                            'Lis',
+                            'Gru',
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Kwi 2023'), findsOneWidget);
+        expect(find.text('Nd'), findsOneWidget);
+        expect(find.text('Po'), findsOneWidget);
+        expect(find.text('Wt'), findsOneWidget);
+        expect(find.text('Śr'), findsOneWidget);
+        expect(find.text('Cz'), findsOneWidget);
+        expect(find.text('Pt'), findsOneWidget);
+        expect(find.text('So'), findsOneWidget);
+      },
+    );
   });
+
+  testWidgets(
+    'Graphical MacosDatePicker with "startWeekOnMonday" set to true shows Monday as the first day of the week',
+    (tester) async {
+      await tester.pumpWidget(
+        MacosApp(
+          home: MacosWindow(
+            child: MacosScaffold(
+              children: [
+                ContentArea(
+                  builder: (context, _) {
+                    return Center(
+                      child: MacosDatePicker(
+                        startWeekOnMonday: true,
+                        initialDate: DateTime.parse('2023-04-01'),
+                        onDateChanged: (date) {},
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final dayHeadersRow = find.byType(GridView).first;
+      final dayHeaders = find.descendant(
+        of: dayHeadersRow,
+        matching: find.byType(Text),
+      );
+      final firstWeekday = dayHeaders.first;
+      final firstWeekdayText =
+          (firstWeekday.evaluate().first.widget as Text).data;
+      await tester.pumpAndSettle();
+
+      expect(firstWeekdayText, 'Mo');
+
+      final calendarGrid = find.byType(GridView).last;
+      final dayOffsetWidgets = find.descendant(
+        of: calendarGrid,
+        matching: find.byType(SizedBox),
+      );
+      final dayOffset = dayOffsetWidgets.evaluate().length;
+
+      expect(dayOffset, 5);
+    },
+  );
+
+  // Regression test due to invalid "firstDayOfWeekIndex" implementation in MaterialLocalizations
+  // issue: https://github.com/flutter/flutter/issues/122274
+  // TODO: remove this once the issue is fixed and test starts failing
+  testWidgets(
+    'Graphical MacosDatePicker still needs "startWeekOnMonday" to show Monday as the first day of the week, even when the locale is set to something other than "en_US"',
+    (tester) async {
+      await tester.pumpWidget(
+        MacosApp(
+          supportedLocales: const [
+            Locale('en', 'PL'),
+          ],
+          home: MacosWindow(
+            child: MacosScaffold(
+              children: [
+                ContentArea(
+                  builder: (context, _) {
+                    return Center(
+                      child: MacosDatePicker(
+                        startWeekOnMonday: true,
+                        initialDate: DateTime.parse('2023-04-01'),
+                        onDateChanged: (date) {},
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final dayHeadersRow = find.byType(GridView).first;
+      final dayHeaders = find.descendant(
+        of: dayHeadersRow,
+        matching: find.byType(Text),
+      );
+      final firstWeekday = dayHeaders.first;
+      final firstWeekdayText =
+          (firstWeekday.evaluate().first.widget as Text).data;
+      await tester.pumpAndSettle();
+
+      // The result will be 'Tu' if the fix is no longer needed and can be removed
+      expect(firstWeekdayText, 'Mo');
+    },
+  );
 }
