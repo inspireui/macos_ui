@@ -275,52 +275,10 @@ class _MacosWindowState extends State<MacosWindow> {
                           child: Column(
                             children: [
                               // If an app is running on macOS, apply
-                              // sidebar.topOffset as needed in order to avoid the
-                              // traffic lights. Otherwise, position the sidebar
-                              // by the top of the application's bounds based on
-                              // the presence of sidebar.top.
-                              if (!kIsWeb && sidebar.topOffset > 0) ...[
-                                SizedBox(height: sidebar.topOffset),
-                              ] else if (sidebar.top != null) ...[
-                                const SizedBox(height: 12),
-                              ] else
-                                const SizedBox.shrink(),
-                              if (_sidebarScrollController.hasClients &&
-                                  _sidebarScrollController.offset > 0.0)
-                                Divider(
-                                    thickness: 1,
-                                    height: 1,
-                                    color: dividerColor),
-                              if (sidebar.top != null &&
-                                  constraints.maxHeight > 81)
-                                sidebar.top!,
-                              Expanded(
-                                child: MacosScrollbar(
-                                  controller: _sidebarScrollController,
-                                  child: Padding(
-                                    padding: sidebar.padding,
-                                    child: sidebar.builder(
-                                      context,
-                                      _sidebarScrollController,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (sidebar.bottom != null &&
-                                  constraints.maxHeight > 141)
-                                sidebar.bottom!,
-                            ],
-                          ),
-                        )
-                      : TransparentMacOSSidebar(
-                          state: sidebarState,
-                          child: Column(
-                            children: [
-                              // If an app is running on macOS, apply
-                              // sidebar.topOffset as needed in order to avoid the
-                              // traffic lights. Otherwise, position the sidebar
-                              // by the top of the application's bounds based on
-                              // the presence of sidebar.top.
+                              // sidebar.topOffset as needed in order to avoid
+                              // the traffic lights. Otherwise, position the
+                              // sidebar by the top of the application's bounds
+                              // based on the presence of sidebar.top.
                               if (!kIsWeb && sidebar.topOffset > 0) ...[
                                 SizedBox(height: sidebar.topOffset),
                               ] else if (sidebar.top != null) ...[
@@ -337,7 +295,58 @@ class _MacosWindowState extends State<MacosWindow> {
                                   constraints.maxHeight > 81)
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
+                                    horizontal: 8.0,
+                                  ),
+                                  child: sidebar.top!,
+                                ),
+                              Expanded(
+                                child: MacosScrollbar(
+                                  controller: _sidebarScrollController,
+                                  child: Padding(
+                                    padding: sidebar.padding,
+                                    child: sidebar.builder(
+                                      context,
+                                      _sidebarScrollController,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (sidebar.bottom != null &&
+                                  constraints.maxHeight > 141)
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: sidebar.bottom!,
+                                ),
+                            ],
+                          ),
+                        )
+                      : TransparentMacOSSidebar(
+                          state: sidebarState,
+                          child: Column(
+                            children: [
+                              // If an app is running on macOS, apply
+                              // sidebar.topOffset as needed in order to avoid
+                              // the traffic lights. Otherwise, position the
+                              // sidebar by the top of the application's bounds
+                              // based on the presence of sidebar.top.
+                              if (!kIsWeb && sidebar.topOffset > 0) ...[
+                                SizedBox(height: sidebar.topOffset),
+                              ] else if (sidebar.top != null) ...[
+                                const SizedBox(height: 12),
+                              ] else
+                                const SizedBox.shrink(),
+                              if (_sidebarScrollController.hasClients &&
+                                  _sidebarScrollController.offset > 0.0)
+                                Divider(
+                                    thickness: 1,
+                                    height: 1,
+                                    color: dividerColor),
+                              if (sidebar.top != null &&
+                                  constraints.maxHeight > 81)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
                                   child: sidebar.top!,
                                 ),
                               Expanded(
@@ -474,45 +483,40 @@ class _MacosWindowState extends State<MacosWindow> {
                     minHeight: height,
                     maxHeight: height,
                   ).normalize(),
-                  child: WallpaperTintedArea(
-                    backgroundColor: endSidebarBackgroundColor,
-                    insertRepaintBoundary: true,
-                    child: Column(
-                      children: [
-                        if (endSidebar.topOffset > 0)
-                          SizedBox(height: endSidebar.topOffset),
-                        if (_endSidebarScrollController.hasClients &&
-                            _endSidebarScrollController.offset > 0.0)
-                          Divider(
-                            thickness: 1,
-                            height: 1,
-                            color: dividerColor,
-                          ),
-                        if (endSidebar.top != null)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: endSidebar.top!,
-                          ),
-                        Expanded(
-                          child: MacosScrollbar(
-                            controller: _endSidebarScrollController,
-                            child: Padding(
-                              padding: endSidebar.padding,
-                              child: endSidebar.builder(
-                                context,
-                                _endSidebarScrollController,
-                              ),
+                  child: Column(
+                    children: [
+                      if (endSidebar.topOffset > 0)
+                        SizedBox(height: endSidebar.topOffset),
+                      if (_endSidebarScrollController.hasClients &&
+                          _endSidebarScrollController.offset > 0.0)
+                        Divider(
+                          thickness: 1,
+                          height: 1,
+                          color: dividerColor,
+                        ),
+                      if (endSidebar.top != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: endSidebar.top!,
+                        ),
+                      Expanded(
+                        child: MacosScrollbar(
+                          controller: _endSidebarScrollController,
+                          child: Padding(
+                            padding: endSidebar.padding,
+                            child: endSidebar.builder(
+                              context,
+                              _endSidebarScrollController,
                             ),
                           ),
                         ),
-                        if (endSidebar.bottom != null)
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: endSidebar.bottom!,
-                          ),
-                      ],
-                    ),
+                      ),
+                      if (endSidebar.bottom != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: endSidebar.bottom!,
+                        ),
+                    ],
                   ),
                 ),
               ),
